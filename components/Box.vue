@@ -34,7 +34,22 @@ const props = defineProps({
   },
 });
 
+const productsGrid = [
+  { x: -1, z: -1 },
+  { x: 0, z: -1 },
+  { x: 1, z: -1 },
+  { x: -1, z: 0 },
+  { x: 0, z: 0 },
+  { x: 1, z: 0 },
+  { x: -1, z: 1 },
+  { x: 0, z: 1 },
+  { x: 1, z: 1 },
+];
+
+let productGridCounter = 0;
+
 const shelves = [];
+const cubeCameras = [];
 
 watch(
   () => props.scrollVal,
@@ -55,7 +70,10 @@ let _camera: PerspectiveCamera;
 let _renderer: WebGLRenderer;
 let _cubeCamera: CubeCamera;
 let _renderLoopId: number;
-let _box: Mesh;
+
+const sugarCounter = ref();
+sugarCounter.value = 0;
+
 let _floor: Mesh;
 let _roof: Mesh;
 
@@ -65,14 +83,19 @@ let shelfModel = null;
 let currX;
 let currY;
 
+let selectMode = false;
+let savedPos = null;
+
+const productSelection = new Group();
+
 const raycaster = new Raycaster();
 const mouse = new Vector2();
 
-const floorLength = 200; // Gesamtlänge des Bodens
+const floorLength = 100; // Gesamtlänge des Bodens
 const shelfLength = 0.5; // Länge eines Regals
 const shelfHeight = 2; // Höhe eines Regals
-const shelfWidth = 3; // Breite eines Regals
-const dist = 2.7; // Abstand zwischen Regalen
+const shelfWidth = 2.5; // Breite eines Regals
+const dist = 2.2; // Abstand zwischen Regalen
 
 const { initThree, cleanUpThree } = useThree();
 const canvas = computed(
@@ -88,47 +111,84 @@ function onClick(event) {
 
   if (intersects.length > 0) {
     const clickedObject = intersects[0].object; // Das angeklickte Objekt
-    console.log("Clicked object:", clickedObject);
+    let topGroup = clickedObject;
+    while (topGroup.parent && topGroup.parent != _scene) {
+      topGroup = topGroup.parent;
+    }
+    if (!selectMode) {
+      selectMode = true;
+      savedPos = _camera.position.clone();
+      console.log("xx");
+      console.log(savedPos);
+      console.log("xx");
+      _camera.position.z = topGroup.position.z;
+      _camera.position.y = 1.2;
+      if (topGroup.position.x > 0) {
+        _camera.position.x = -1.5;
+      } else {
+        _camera.position.x = 1.5;
+      }
 
-    _camera.position.z = clickedObject.position.z;
-    _camera.position.x = -2.1;
-    _camera.lookAt(
-      clickedObject.position.x,
-      clickedObject.position.y,
-      clickedObject.position.z
-    );
-    clickedObject.material.color.set(0x0000ff); // Ändere die Farbe des Objekts
+      _camera.lookAt(
+        topGroup.position.x,
+        topGroup.position.y,
+        topGroup.position.z
+      );
+    } else {
+      let addedProduct = clickedObject.clone();
+      addedProduct.scale.set(0.3, 0.3, 0.3);
+      addedProduct.position.set(
+        productsGrid[productGridCounter].x * 0.12,
+        0,
+        productsGrid[productGridCounter].z * 0.12
+      );
+      addedProduct.translateX(0);
+      addedProduct.translateY(0);
+      addedProduct.translateZ(0);
+      productGridCounter++;
+      sugarCounter.value += clickedObject.userData.sugarAmount;
+      productSelection.add(addedProduct);
+      clickedObject.visible = false;
+    }
+    // Ändere die Farbe des Objekts
   }
 }
 
 function animateObject() {
   //rotate object
-
-  _box.rotation.x += 0.01;
-  _box.rotation.y += 0.01;
 }
 
 function moveCameraZ(z) {
-  _camera.position.z = z;
-  shoppingCart.position.set(0.7, 0.07, _camera.position.z + 1);
-  _camera.lookAt(currX, currY, _camera.position.z - 4);
+  if (!selectMode) {
+    _camera.position.z = z;
+    shoppingCart.position.set(0.717, 0.07, _camera.position.z + 1);
+    productSelection.position.set(-0.1, 0.5, _camera.position.z - 1);
+    _camera.lookAt(currX, currY, _camera.position.z - 4);
+  }
 
-  _cubeCamera.position.z = _camera.position.z;
+  //_cubeCamera.position.z = _camera.position.z;
 }
 
 function moveCameraXY(x, y) {
-  currX = (x / window.innerWidth - 0.5) * 8;
-  currY = (y / window.innerHeight - 0.5) * -8;
-
-  _camera.lookAt(currX, currY, _camera.position.z - 4);
-
-  _cubeCamera.position.z = _camera.position.z;
+  if (selectMode) {
+    if (_camera.position.x < 0) {
+      currX = _camera.position.z + (x / window.innerWidth - 0.5) * 0.3;
+      currY = (y / window.innerHeight - 0.5) * -0.3 + 1.2;
+      _camera.lookAt(_camera.position.x + 1.5, currY, currX);
+    } else {
+      currX = _camera.position.z - (x / window.innerWidth - 0.5) * 0.3;
+      currY = (y / window.innerHeight - 0.5) * -0.3 + 1.2;
+      _camera.lookAt(_camera.position.x - 1.5, currY, currX);
+    }
+  } else {
+    currX = (x / window.innerWidth - 0.5) * 8;
+    currY = (y / window.innerHeight - 0.5) * -8;
+    _camera.lookAt(currX, currY, _camera.position.z - 4);
+  }
 }
 
 function renderLoop() {
-  // will keep running for every frame since
-  // we keep recreate a new requestAnimationFrame at the end of the function.
-
+  _cubeCamera.position.copy(_camera.position);
   _cubeCamera.update(_renderer, _scene);
   _renderer.render(_scene, _camera);
   animateObject();
@@ -136,79 +196,37 @@ function renderLoop() {
 }
 
 function createShelves(scene: Scene, x) {
-  loader.load(
-    "/models/shelf.glb", // Pfad zum GLB-Modell
-    (gltf) => {
-      shelfModel = gltf.scene;
-      const shelfBorderBox = new Box3().setFromObject(shelfModel);
-      const shelfSize = new Vector3();
-      shelfBorderBox.getSize(shelfSize); // size enthält die Dimensionen: { x: Breite, y: Höhe, z: Tiefe }
-
-      const scale = shelfWidth / shelfSize.x;
-
-      for (let index = 0; index < floorLength / (shelfWidth + dist); index++) {
-        const newShelf = shelfModel.clone();
-        newShelf.scale.set(scale, scale, scale);
-        newShelf.position.x = x; // Regale entlang der X-Achse platzieren
-        newShelf.position.y = 0.05; // Regale leicht über dem Boden positionieren
-        newShelf.position.z = -1 * (index * (shelfLength + dist)); // Z-Achse bleibt konstant (eine Linie)
-        if (x > 0) {
-          newShelf.rotation.y = Math.PI / 2;
-        } else {
-          newShelf.rotation.y = Math.PI * 1.5;
-        }
-
-        shelves.push(newShelf);
-        _scene.add(newShelf);
-      }
-
-      console.log("Model loaded:", gltf);
-    },
-    (xhr) => {
-      // Fortschrittsanzeige (optional)
-      console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-    },
-    (error) => {
-      // Fehlerbehandlung
-      console.error("An error occurred:", error);
-    }
-  ); /*
   for (let index = 0; index < floorLength / (shelfWidth + dist); index++) {
-    // Geometrie für das Regal
-    const material = new MeshStandardMaterial({ color: 0x8b4513 }); // Regal-Material (Holzfarbe)
-
-    const geometry = new BoxGeometry(shelfLength, shelfHeight, shelfWidth);
-    const shelf = new Mesh(geometry, material);
+    const shelf = createShelve(shelfHeight, shelfWidth, shelfLength);
 
     // Position des Regals berechnen
     shelf.position.x = x; // Regale entlang der X-Achse platzieren
-    shelf.position.y = shelfHeight / 2; // Regale leicht über dem Boden positionieren
+    shelf.position.y = shelfHeight / 2 + 0.1; // Regale leicht über dem Boden positionieren
     shelf.position.z = -1 * (index * (shelfLength + dist)); // Z-Achse bleibt konstant (eine Linie)
+    if (x < 0) {
+      shelf.rotation.y = Math.PI / 2;
+    } else {
+      shelf.rotation.y = -Math.PI / 2;
+    }
 
+    shelf.castShadow = true;
     // Regal der Szene hinzufügen
     shelves.push(shelf);
     _scene.add(shelf);
-  }*/
-}
-
-function createLights(scene: Scene, y) {
-  for (
-    let index = 0;
-    index < floorLength / ((shelfWidth + dist) * 2);
-    index++
-  ) {
-    const rectAreaLight = new RectAreaLight(0xffffff, 4.0, 0.7, 2);
-    rectAreaLight.position.set(0, 3, -1 * (index * ((shelfLength + dist) * 2)));
-    rectAreaLight.lookAt(0, 0, -1 * (index * (shelfLength + dist) * 2)); // Ensure light points at the center
-
-    const rectLightHelper = new RectAreaLightHelper(rectAreaLight); // Helper to visualize the light
-    rectAreaLight.add(rectLightHelper);
-
-    scene.add(rectAreaLight);
   }
 }
 
-function createCubeCamera(scene: Scene) {
+function leaveSelectMode() {
+  if (selectMode) {
+    console.log(savedPos);
+    _camera.position.set(savedPos.x, savedPos.y, savedPos.z);
+    _camera.lookAt(0, 0, _camera.position.z - 4);
+
+    selectMode = false;
+  }
+}
+
+function createCubeCamera() {
   // CubeCamera für Reflexionen
   _cubeRenderTarget = new WebGLCubeRenderTarget(128, {
     generateMipmaps: true,
@@ -217,8 +235,6 @@ function createCubeCamera(scene: Scene) {
 
   // Create cube camera
   _cubeCamera = new CubeCamera(1, 100000, _cubeRenderTarget);
-
-  scene.add(_cubeCamera);
 }
 
 function setupScene() {
@@ -229,14 +245,14 @@ function setupScene() {
   _camera.aspect = window.innerWidth / window.innerHeight; // Neues Seitenverhältnis
   _camera.updateProjectionMatrix();
   _renderer = renderer;
-  createCubeCamera(_scene);
+  createCubeCamera();
   const floor = new BoxGeometry(10, 0.1, floorLength);
   const floorMaterial = new MeshStandardMaterial({
     color: 0xffffff, // Farbe des Bodens
-    roughness: 0.19, // Sehr wenig Rauheit für eine spiegelglatte Oberfläche
-    metalness: 0.7, // Maximale Metallizität für Reflexionen
+    roughness: 0.1, // Sehr wenig Rauheit für eine spiegelglatte Oberfläche
+    metalness: 0.3, // Maximale Metallizität für Reflexionen
     envMap: _cubeRenderTarget.texture,
-    envMapIntensity: 0.5,
+    envMapIntensity: 1,
   });
 
   loader.load(
@@ -245,21 +261,31 @@ function setupScene() {
       shoppingCart = gltf.scene;
 
       shoppingCart.scale.set(0.02, 0.02, 0.02);
-      shoppingCart.position.set(0.7, 0.07, 5);
+      shoppingCart.position.set(0.717, 0.07, 5);
       shoppingCart.rotation.y = Math.PI / 2;
       // Das geladene Modell wird im `gltf.scene`-Objekt enthalten sein
       _scene.add(shoppingCart);
-      console.log("Model loaded:", gltf);
     },
     (xhr) => {
       // Fortschrittsanzeige (optional)
-      console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+      //console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
     },
     (error) => {
       // Fehlerbehandlung
       console.error("An error occurred:", error);
     }
   );
+
+  const testProductGeometry = new BoxGeometry(0.1, 0.1, 0.1);
+  const testProductrMaterial = new MeshStandardMaterial({
+    color: 0xfff000, // Farbe des Bodens
+  });
+
+  const testProduct = new Mesh(testProductGeometry, testProductrMaterial);
+
+  //productSelection.add(testProduct);
+  _scene.add(productSelection);
+  productSelection.position.set(0, 0.5, 3);
 
   _floor = new Mesh(floor, floorMaterial);
   _floor.position.set(0, 0, 4 + -floorLength / 2);
@@ -269,9 +295,7 @@ function setupScene() {
   const roofMaterial = new MeshStandardMaterial({
     color: 0xeeefee, // Farbe des Bodens
     roughness: 0.5, // Sehr wenig Rauheit für eine spiegelglatte Oberfläche
-    metalness: 1, // Maximale Metallizität für Reflexionen
-    envMap: _cubeRenderTarget.texture,
-    envMapIntensity: 1.0,
+    metalness: 0.5, // Maximale Metallizität für Reflexionen
   });
 
   _roof = new Mesh(roof, roofMaterial);
@@ -280,14 +304,8 @@ function setupScene() {
 
   createShelves(_scene, -1.6);
   createShelves(_scene, 1.6);
-  createLights(_scene);
-  //create a box and add to scene
-  const boxGeometry = new BoxGeometry(1, 1, 1);
-  const boxMaterial = new MeshStandardMaterial({ color: 0x00ff00 });
-
-  _box = new Mesh(boxGeometry, boxMaterial);
-  _box.position.set(2, 1, -3);
-  _scene.add(_box);
+  const lights = createLights(floorLength, shelfWidth, shelfLength, dist);
+  _scene.add(lights);
 
   // start the renderLoop
   _renderLoopId = requestAnimationFrame(renderLoop);
@@ -308,8 +326,13 @@ onBeforeUnmount(() => {
   cancelAnimationFrame(_renderLoopId);
   cleanUpThree(_scene, _renderer);
 });
+
+defineExpose({ leaveSelectMode });
 </script>
 
 <template>
   <canvas id="mountId" width="700" height="500" />
+  <div class="fixed top-2 right-2 text-white font-semibold text-4xl">
+    <p v-html="sugarCounter"></p>
+  </div>
 </template>

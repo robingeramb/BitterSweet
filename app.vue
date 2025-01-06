@@ -1,9 +1,9 @@
 <template>
-  <Box :mousePos="mousePosition" :scrollVal="scrollValue" />
+  <Box ref="threeJS" :mousePos="mousePosition" :scrollVal="scrollValue" />
 </template>
 <script setup lang="ts">
 const mousePosition = ref({ x: 0, y: 0 });
-
+const threeJS = ref(null);
 const updateMousePosition = (event) => {
   mousePosition.value.x = event.clientX;
   mousePosition.value.y = event.clientY;
@@ -34,6 +34,12 @@ const handleWheel = (event) => {
 onMounted(() => {
   window.addEventListener("wheel", handleWheel);
   window.addEventListener("mousemove", updateMousePosition);
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      console.log("Escape-Taste gedrückt!");
+      threeJS.value.leaveSelectMode();
+    }
+  });
 });
 
 onBeforeUnmount(() => {
