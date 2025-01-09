@@ -9,6 +9,7 @@ export function createShelve(height: number, length: number, width: number) {
 
   const bottomMesh = new THREE.Mesh(bottom, bottomMaterial);
   bottomMesh.castShadow = true;
+  bottomMesh.receiveShadow = true;
   bottomMesh.position.set(0, -height / 2 + height * 0.025, 0);
   const myStore = useProductsStore();
   const productList = myStore.products;
@@ -22,12 +23,15 @@ export function createShelve(height: number, length: number, width: number) {
     const material = new THREE.MeshStandardMaterial({ color: 0x454545 });
     let board = new THREE.Mesh(geometry, material);
     board.castShadow = true;
+    board.receiveShadow = true;
 
     const products = createProducts(width, length, productList);
     products.translateY(height * 0.0125);
     products.translateX(-0.5 * length);
     productBoard.add(products);
     productBoard.add(board);
+    productBoard.castShadow = true;
+    productBoard.receiveShadow = true;
     productBoard.position.set(
       0,
       -height / 2 + height * 0.0625 + i * ((height * 0.95) / 4),
@@ -39,6 +43,8 @@ export function createShelve(height: number, length: number, width: number) {
   const backMesh = new THREE.Mesh(back, material);
   backMesh.position.set(0, 0, -width / 2 + width * 0.025);
   backMesh.castShadow = true;
+  backMesh.receiveShadow = true;
+
   shelf.add(bottomMesh);
   shelf.add(backMesh);
   return shelf; // Die Gruppe zurückgeben

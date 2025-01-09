@@ -19,6 +19,7 @@ export function createProducts(
     productGeometry.translate(l / 2 + dist, 0.15, 0);
     const product = new THREE.Mesh(productGeometry, productMaterial);
     product.castShadow = true;
+    product.receiveShadow = true;
     product.position.set(index * (l + dist), 0, 0);
     product.userData = productList[index];
     products.add(product);

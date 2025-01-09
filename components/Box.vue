@@ -263,6 +263,8 @@ function setupScene() {
       shoppingCart.scale.set(0.02, 0.02, 0.02);
       shoppingCart.position.set(0.717, 0.07, 5);
       shoppingCart.rotation.y = Math.PI / 2;
+      shoppingCart.castShadow = true;
+      shoppingCart.receiveShadow = true;
       // Das geladene Modell wird im `gltf.scene`-Objekt enthalten sein
       _scene.add(shoppingCart);
     },
@@ -289,6 +291,7 @@ function setupScene() {
 
   _floor = new Mesh(floor, floorMaterial);
   _floor.position.set(0, 0, 4 + -floorLength / 2);
+  _floor.receiveShadow = true;
   _scene.add(_floor);
 
   const roof = new BoxGeometry(10, 0.1, floorLength);

@@ -9,6 +9,7 @@ import {
   Mesh,
   MeshStandardMaterial,
   AmbientLight,
+  PCFSoftShadowMap,
 } from "three";
 import { disposeObject } from "@/utils/disposeUtils";
 
@@ -32,6 +33,7 @@ export function useThree() {
       alpha: true,
     });
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.physicallyCorrectLights = true; // Enable physical lighting
 
     return { scene, camera, renderer };
