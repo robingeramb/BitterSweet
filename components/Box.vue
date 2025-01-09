@@ -92,7 +92,7 @@ const productSelection = new Group();
 const raycaster = new Raycaster();
 const mouse = new Vector2();
 
-const floorLength = 100; // Gesamtlänge des Bodens
+const floorLength = 150; // Gesamtlänge des Bodens
 const shelfLength = 0.5; // Länge eines Regals
 const shelfHeight = 2; // Höhe eines Regals
 const shelfWidth = 2.5; // Breite eines Regals
