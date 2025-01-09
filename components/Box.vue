@@ -4,6 +4,7 @@ import {
   BoxGeometry,
   Mesh,
   MeshStandardMaterial,
+  MeshPhongMaterial,
   PerspectiveCamera,
   CubeTextureLoader,
   AmbientLight,
