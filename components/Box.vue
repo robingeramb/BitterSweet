@@ -1,336 +1,290 @@
 <script setup lang="ts">
-import { useThree } from "@/composables/useThree";
+/* --- Imports --- */
+import CANNON from "cannon";
+import { useThree, camera, scene } from "@/composables/useThree";
+import { useMoveCamera } from "@/composables/moveCamera";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
   BoxGeometry,
   Mesh,
   MeshStandardMaterial,
-  MeshPhongMaterial,
-  PerspectiveCamera,
-  CubeTextureLoader,
-  AmbientLight,
-  DirectionalLight,
-  Scene,
-  Group,
   CubeCamera,
   WebGLRenderer,
-  RectAreaLight,
-  Raycaster,
-  Vector2,
-  Box3,
-  Vector3,
   WebGLCubeRenderTarget,
   LinearMipmapLinearFilter,
 } from "three";
-import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-const props = defineProps({
-  mousePos: {
-    type: Object,
-    required: true,
-  },
-  scrollVal: {
-    type: Number,
-    required: true,
-  },
-});
+/* --- Props --- */
+interface Props {
+  mousePos: { x: number; y: number };
+  scrollVal: number;
+}
 
-const productsGrid = [
-  { x: -1, z: -1 },
-  { x: 0, z: -1 },
-  { x: 1, z: -1 },
-  { x: -1, z: 0 },
-  { x: 0, z: 0 },
-  { x: 1, z: 0 },
-  { x: -1, z: 1 },
-  { x: 0, z: 1 },
-  { x: 1, z: 1 },
-];
+const props = defineProps<Props>();
 
-let productGridCounter = 0;
-
-const shelves = [];
-const cubeCameras = [];
-
-watch(
-  () => props.scrollVal,
-  (newValue, oldValue) => {
-    moveCameraZ(newValue);
-  }
-);
-watch(
-  () => [props.mousePos.x, props.mousePos.y],
-  ([newX, newY], [oldX, oldY]) => {
-    moveCameraXY(newX, newY);
-  }
-);
-
-let _scene: Scene;
+/* --- Reactive Variables and References --- */
+let shoppingCart: Mesh | null = null;
+const sugarCounter = ref<number>(0);
 let _cubeRenderTarget: WebGLCubeRenderTarget;
-let _camera: PerspectiveCamera;
 let _renderer: WebGLRenderer;
 let _cubeCamera: CubeCamera;
 let _renderLoopId: number;
-
-const sugarCounter = ref();
-sugarCounter.value = 0;
-
 let _floor: Mesh;
 let _roof: Mesh;
 
-let shoppingCart = null;
-let shelfModel = null;
+/* --- Constants --- */
+const floorLength: number = 20;
+const shelfLength: number = 0.5;
+const shelfHeight: number = 2;
+const shelfWidth: number = 2.5;
+const dist: number = 2.2;
 
-let currX;
-let currY;
-
-let selectMode = false;
-let savedPos = null;
-
-const productSelection = new Group();
-
-const raycaster = new Raycaster();
-const mouse = new Vector2();
-
-const floorLength = 80; // Gesamtlänge des Bodens
-const shelfLength = 0.5; // Länge eines Regals
-const shelfHeight = 2; // Höhe eines Regals
-const shelfWidth = 2.5; // Breite eines Regals
-const dist = 2.2; // Abstand zwischen Regalen
-
+/* --- Composables --- */
 const { initThree, cleanUpThree } = useThree();
+const { moveCameraZ, moveCameraXY } = useMoveCamera();
 const canvas = computed(
-  () => document.getElementById("mountId") as HTMLCanvasElement
+  (): HTMLCanvasElement | null =>
+    document.getElementById("mountId") as HTMLCanvasElement
 );
 
-function onClick(event) {
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+/* --- Watches --- */
+watch(
+  () => props.scrollVal,
+  (newValue: number) => moveCameraZ(newValue)
+);
 
-  raycaster.setFromCamera(mouse, _camera);
-  const intersects = raycaster.intersectObjects(shelves);
+watch(
+  () => [props.mousePos.x, props.mousePos.y],
+  ([newX, newY]: [number, number]) => moveCameraXY(newX, newY)
+);
 
-  if (intersects.length > 0) {
-    const clickedObject = intersects[0].object; // Das angeklickte Objekt
-    let topGroup = clickedObject;
-    while (topGroup.parent && topGroup.parent != _scene) {
-      topGroup = topGroup.parent;
-    }
-    if (!selectMode) {
-      selectMode = true;
-      savedPos = _camera.position.clone();
-      console.log("xx");
-      console.log(savedPos);
-      console.log("xx");
-      _camera.position.z = topGroup.position.z;
-      _camera.position.y = 1.2;
-      if (topGroup.position.x > 0) {
-        _camera.position.x = -1.5;
-      } else {
-        _camera.position.x = 1.5;
-      }
-
-      _camera.lookAt(
-        topGroup.position.x,
-        topGroup.position.y,
-        topGroup.position.z
-      );
-    } else {
-      let addedProduct = clickedObject.clone();
-      addedProduct.scale.set(0.3, 0.3, 0.3);
-      addedProduct.position.set(
-        productsGrid[productGridCounter].x * 0.12,
-        0,
-        productsGrid[productGridCounter].z * 0.12
-      );
-      addedProduct.translateX(0);
-      addedProduct.translateY(0);
-      addedProduct.translateZ(0);
-      productGridCounter++;
-      sugarCounter.value += clickedObject.userData.sugarAmount;
-      productSelection.add(addedProduct);
-      clickedObject.visible = false;
-    }
-    // Ändere die Farbe des Objekts
-  }
-}
-
-function animateObject() {
-  //rotate object
-}
-
-function moveCameraZ(z) {
-  if (!selectMode) {
-    _camera.position.z = z;
-    shoppingCart.position.set(0.717, 0.07, _camera.position.z + 1);
-    productSelection.position.set(-0.1, 0.5, _camera.position.z - 1);
-    _camera.lookAt(currX, currY, _camera.position.z - 4);
-  }
-
-  //_cubeCamera.position.z = _camera.position.z;
-}
-
-function moveCameraXY(x, y) {
-  if (selectMode) {
-    if (_camera.position.x < 0) {
-      currX = _camera.position.z + (x / window.innerWidth - 0.5) * 0.3;
-      currY = (y / window.innerHeight - 0.5) * -0.3 + 1.2;
-      _camera.lookAt(_camera.position.x + 1.5, currY, currX);
-    } else {
-      currX = _camera.position.z - (x / window.innerWidth - 0.5) * 0.3;
-      currY = (y / window.innerHeight - 0.5) * -0.3 + 1.2;
-      _camera.lookAt(_camera.position.x - 1.5, currY, currX);
-    }
-  } else {
-    currX = (x / window.innerWidth - 0.5) * 8;
-    currY = (y / window.innerHeight - 0.5) * -8;
-    _camera.lookAt(currX, currY, _camera.position.z - 4);
-  }
-}
-
-function renderLoop() {
-  _cubeCamera.position.copy(_camera.position);
-  _cubeCamera.update(_renderer, _scene);
-  _renderer.render(_scene, _camera);
-  animateObject();
-  _renderLoopId = requestAnimationFrame(renderLoop);
-}
-
-function createShelves(scene: Scene, x) {
-  for (let index = 0; index < floorLength / (shelfWidth + dist); index++) {
-    const shelf = createShelve(shelfHeight, shelfWidth, shelfLength);
-
-    // Position des Regals berechnen
-    shelf.position.x = x; // Regale entlang der X-Achse platzieren
-    shelf.position.y = shelfHeight / 2 + 0.1; // Regale leicht über dem Boden positionieren
-    shelf.position.z = -1 * (index * (shelfLength + dist)); // Z-Achse bleibt konstant (eine Linie)
-    if (x < 0) {
-      shelf.rotation.y = Math.PI / 2;
-    } else {
-      shelf.rotation.y = -Math.PI / 2;
-    }
-
-    shelf.castShadow = true;
-    // Regal der Szene hinzufügen
-    shelves.push(shelf);
-    _scene.add(shelf);
-  }
-}
-
-function leaveSelectMode() {
-  if (selectMode) {
-    console.log(savedPos);
-    _camera.position.set(savedPos.x, savedPos.y, savedPos.z);
-    _camera.lookAt(0, 0, _camera.position.z - 4);
-
-    selectMode = false;
-  }
-}
-
-function createCubeCamera() {
-  // CubeCamera für Reflexionen
+/* --- Functions --- */
+function createCubeCamera(): void {
   _cubeRenderTarget = new WebGLCubeRenderTarget(128, {
     generateMipmaps: true,
     minFilter: LinearMipmapLinearFilter,
   });
-
-  // Create cube camera
   _cubeCamera = new CubeCamera(1, 100000, _cubeRenderTarget);
 }
 
-function setupScene() {
-  //initialize
-  const { scene, camera, renderer } = initThree("mountId");
-  _scene = scene;
-  _camera = camera;
-  _camera.aspect = window.innerWidth / window.innerHeight; // Neues Seitenverhältnis
-  _camera.updateProjectionMatrix();
+async function loadModel(name: string): Promise<Mesh | null> {
+  const loader = new GLTFLoader();
+  return new Promise((resolve, reject) => {
+    loader.load(
+      `/models/${name}`,
+      (gltf) => resolve(gltf.scene as Mesh),
+      undefined,
+      (error) => reject(error)
+    );
+  });
+}
+
+async function setupScene(): Promise<void> {
+  const { renderer } = initThree("mountId");
   _renderer = renderer;
+
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
   createCubeCamera();
-  const floor = new BoxGeometry(10, 0.1, floorLength);
+
+  // Floor
+  const floorGeometry = new BoxGeometry(10, 0.1, floorLength);
   const floorMaterial = new MeshStandardMaterial({
-    color: 0xffffff, // Farbe des Bodens
-    roughness: 0.1, // Sehr wenig Rauheit für eine spiegelglatte Oberfläche
-    metalness: 0.3, // Maximale Metallizität für Reflexionen
+    color: 0xffffff,
+    roughness: 0.1,
+    metalness: 0.1,
     envMap: _cubeRenderTarget.texture,
     envMapIntensity: 1,
   });
+  _floor = new Mesh(floorGeometry, floorMaterial);
+  _floor.position.set(0, 0, -floorLength / 2);
+  _floor.receiveShadow = true;
+  scene.add(_floor);
 
-  loader.load(
-    "/models/altspace_blue_shopping_cart.glb", // Pfad zum GLB-Modell
-    (gltf) => {
-      shoppingCart = gltf.scene;
+  // Roof
+  const roofGeometry = new BoxGeometry(10, 0.1, floorLength);
+  const roofMaterial = new MeshStandardMaterial({
+    color: 0xeeefee,
+    roughness: 0.5,
+    metalness: 0.5,
+  });
+  _roof = new Mesh(roofGeometry, roofMaterial);
+  _roof.position.set(0, 3.1, -floorLength / 2);
+  scene.add(_roof);
 
+  // Shopping cart
+  try {
+    shoppingCart = await loadModel("altspace_blue_shopping_cart.glb");
+    if (shoppingCart) {
       shoppingCart.scale.set(0.02, 0.02, 0.02);
       shoppingCart.position.set(0.717, 0.07, 5);
       shoppingCart.rotation.y = Math.PI / 2;
-      shoppingCart.castShadow = true;
-      shoppingCart.receiveShadow = true;
-      // Das geladene Modell wird im `gltf.scene`-Objekt enthalten sein
-      _scene.add(shoppingCart);
-    },
-    (xhr) => {
-      // Fortschrittsanzeige (optional)
-      //console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-    },
-    (error) => {
-      // Fehlerbehandlung
-      console.error("An error occurred:", error);
+      shoppingCart.traverse((child) => {
+        child.castShadow = true;
+      });
+      scene.add(shoppingCart);
+
+      const x = 0.35;
+      const y = 0.3;
+      const z = 0.7;
+      const h = 0.1;
+
+      // Visualisiere das Box-Objekt mit Three.js
+      const geometry = new BoxGeometry(x, h, z); // Maßstab in Three.js
+      const material = new MeshStandardMaterial({
+        color: 0xff0000,
+        opacity: 0,
+        transparent: true,
+      });
+      const mesh = new Mesh(geometry, material);
+      mesh.position.set(0, -h / 2, 0);
+
+      const boxShape = new CANNON.Box(new CANNON.Vec3(x, h / 2, z)); // Rechteckige Box (2x1x0.5)
+      const boxBody = new CANNON.Body({
+        mass: 0, // Die Masse des Körpers
+        position: new CANNON.Vec3(0, -h / 2, 0), // Anfangsposition (x, y, z)
+      });
+      boxBody.addShape(boxShape);
+
+      const wallRight = new BoxGeometry(h, y, z); // Maßstab in Three.js
+      const wallRightMesh = new Mesh(wallRight, material);
+      wallRightMesh.position.set(-x / 2 - h / 2, y / 2, 0);
+      const wallRightCA = new CANNON.Box(new CANNON.Vec3(h / 2, y / 2, z / 2)); // Rechteckige Box (2x1x0.5)
+      const wallRightBodyCA = new CANNON.Body({
+        mass: 0, // Die Masse des Körpers
+        position: new CANNON.Vec3(-x / 2 - h / 2, y / 2, 0), // Anfangsposition (x, y, z)
+      });
+      wallRightBodyCA.addShape(wallRightCA);
+
+      const wallLeftMesh = new Mesh(wallRight, material);
+      wallLeftMesh.position.set(x / 2 + h / 2, y / 2, 0);
+
+      const wallLeftCA = new CANNON.Box(new CANNON.Vec3(h / 2, y / 2, z / 2)); // Rechteckige Box (2x1x0.5)
+      const wallLeftBodyCA = new CANNON.Body({
+        mass: 0, // Die Masse des Körpers
+        position: new CANNON.Vec3(x / 2 + h / 2, y / 2, 0), // Anfangsposition (x, y, z)
+      });
+      wallLeftBodyCA.addShape(wallLeftCA);
+
+      const wallBack = new BoxGeometry(x, y, h); // Maßstab in Three.js
+      const wallBackMesh = new Mesh(wallBack, material);
+      wallBackMesh.position.set(0, y / 2, -z / 2 - h / 2);
+
+      const wallBackCA = new CANNON.Box(new CANNON.Vec3(x / 2, y / 2, h / 2)); // Rechteckige Box (2x1x0.5)
+      const wallBackBodyCA = new CANNON.Body({
+        mass: 0, // Die Masse des Körpers
+        position: new CANNON.Vec3(0, y / 2, -z / 2 - h / 2), // Anfangsposition (x, y, z)
+      });
+      wallBackBodyCA.addShape(wallBackCA);
+
+      const wallFrontMesh = new Mesh(wallBack, material);
+      wallFrontMesh.position.set(0, y / 2, z / 2 + h / 2);
+
+      const wallFrontCA = new CANNON.Box(new CANNON.Vec3(x / 2, y / 2, h / 2)); // Rechteckige Box (2x1x0.5)
+      const wallFrontBodyCA = new CANNON.Body({
+        mass: 0, // Die Masse des Körpers
+        position: new CANNON.Vec3(0, y / 2, z / 2 + h / 2), // Anfangsposition (x, y, z)
+      });
+      wallFrontBodyCA.addShape(wallFrontCA);
+
+      console.log(wallLeftBodyCA.position);
+      console.log(wallRightBodyCA.position);
+
+      /* productSelection.add(wallBackMesh);
+      productSelection.add(wallFrontMesh);
+      productSelection.add(wallRightMesh);
+      productSelection.add(wallLeftMesh);
+      productSelection.add(mesh);*/
+
+      world.addBody(boxBody);
+      world.addBody(wallFrontBodyCA);
+      world.addBody(wallBackBodyCA);
+      world.addBody(wallLeftBodyCA);
+      world.addBody(wallRightBodyCA);
     }
-  );
+  } catch (error) {
+    console.error("Failed to load shopping cart model:", error);
+  }
 
-  const testProductGeometry = new BoxGeometry(0.1, 0.1, 0.1);
-  const testProductrMaterial = new MeshStandardMaterial({
-    color: 0xfff000, // Farbe des Bodens
-  });
+  // Counter
 
-  const testProduct = new Mesh(testProductGeometry, testProductrMaterial);
+  try {
+    let counter = await loadModel("kasse.glb");
+    if (counter) {
+      counter.scale.set(0.2, 0.2, 0.2);
+      counter.position.set(1.5, 0.05, -16);
+      counter.rotation.y = Math.PI / 2;
+      counter.traverse((child) => {
+        child.castShadow = true;
+      });
+      scene.add(counter);
+    }
+  } catch (error) {
+    console.error("Failed to load shopping cart model:", error);
+  }
 
-  //productSelection.add(testProduct);
-  _scene.add(productSelection);
-  productSelection.position.set(0, 0.5, 3);
+  // Shelves and lights
+  createShelves(-1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
+  createShelves(1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
 
-  _floor = new Mesh(floor, floorMaterial);
-  _floor.position.set(0, 0, 4 + -floorLength / 2);
-  _floor.receiveShadow = true;
-  _scene.add(_floor);
-
-  const roof = new BoxGeometry(10, 0.1, floorLength);
-  const roofMaterial = new MeshStandardMaterial({
-    color: 0xeeefee, // Farbe des Bodens
-    roughness: 0.5, // Sehr wenig Rauheit für eine spiegelglatte Oberfläche
-    metalness: 0.5, // Maximale Metallizität für Reflexionen
-  });
-
-  _roof = new Mesh(roof, roofMaterial);
-  _roof.position.set(0, 3.1, 4 + -floorLength / 2);
-  _scene.add(_roof);
-
-  createShelves(_scene, -1.6);
-  createShelves(_scene, 1.6);
   const lights = createLights(floorLength, shelfWidth, shelfLength, dist);
-  _scene.add(lights);
+  scene.add(lights);
 
-  // start the renderLoop
   _renderLoopId = requestAnimationFrame(renderLoop);
 }
-const loader = new GLTFLoader();
 
-onMounted(() => {
+function renderLoop(): void {
+  _cubeCamera.position.copy(camera.position);
+  _cubeCamera.update(_renderer, scene);
+  if (shoppingCart && !selectMode.value) {
+    shoppingCart.position.set(0.717, 0.07, camera.position.z + 1);
+    productSelection.position.set(0, 0.42, camera.position.z - 0.95);
+  } else {
+    if (shoppingCart && selectMode.value) {
+      shoppingCart.position.set(0.717, 0.07, camera.position.z + 1.5);
+      productSelection.position.set(0, 0.42, camera.position.z - 0.45);
+    }
+  }
+  world.step(1 / 60); // Update Cannon.js physics world
+
+  // Iteriere durch alle Objekte und aktualisiere Position und Rotation
+  for (let [threeObj, cannonObj] of physicObjects) {
+    threeObj.position.copy(cannonObj.position);
+    console.log(cannonObj);
+    threeObj.quaternion.copy(cannonObj.quaternion);
+  }
+
+  _renderer.render(scene, camera);
+  _renderLoopId = requestAnimationFrame(renderLoop);
+}
+
+function leaveSelectMode(): void {
+  if (selectMode.value) {
+    camera.position.set(savedPos.x, savedPos.y, savedPos.z);
+    camera.lookAt(0, 0, camera.position.z - 4);
+    selectMode.value = false;
+  }
+}
+
+/* --- Lifecycle Hooks --- */
+onMounted((): void => {
   if (canvas.value) {
-    // Canvas-Größe dynamisch setzen
     canvas.value.width = window.innerWidth;
     canvas.value.height = window.innerHeight;
-    window.addEventListener("click", onClick);
+    window.addEventListener("click", (event: MouseEvent) =>
+      clickEvent(event, selectMode.value)
+    );
     setupScene();
   }
 });
 
-onBeforeUnmount(() => {
+onBeforeUnmount((): void => {
   cancelAnimationFrame(_renderLoopId);
-  cleanUpThree(_scene, _renderer);
+  cleanUpThree(scene, _renderer);
 });
 
+/* --- Exposed Functions --- */
 defineExpose({ leaveSelectMode });
 </script>
 

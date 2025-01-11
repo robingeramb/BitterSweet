@@ -31,11 +31,11 @@ export function createLights(
     const lightGroup = new THREE.Group();
     const rectAreaLight = new THREE.RectAreaLight(0xffffff, 1, 0.7, 2);
     lightGroup.position.set(0, 3, -1 * (index * ((shelfLength + dist) * 2)));
-    rectAreaLight.rotateY(Math.PI / 2); // Ensure light points at the center
+    rectAreaLight.rotateX(-Math.PI / 2); // Ensure light points at the center
 
     const rectLightHelper = new RectAreaLightHelper(rectAreaLight); // Helper to visualize the light
     rectAreaLight.add(rectLightHelper);
-    const spotLight = new THREE.PointLight(0xffffff, 4, 10);
+    const spotLight = new THREE.PointLight(0xffffff, 16, 20);
 
     spotLight.castShadow = true;
 
@@ -46,8 +46,8 @@ export function createLights(
       -1 * (index * (shelfLength + dist) * 2)
     ); // Ensure light points at the center*/
     lightGroup.add(spotLight);
-    lightGroup.add(glassContainer);
-    //lightGroup.add(rectAreaLight);
+    //lightGroup.add(glassContainer);
+    lightGroup.add(rectAreaLight);
     lights.add(lightGroup);
   }
   return lights;
