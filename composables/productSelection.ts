@@ -15,7 +15,7 @@ const productsGrid = [
 
 const scaleAmount = 0.3;
 let productView = false;
-let selectedProduct = null;
+export let selectedProduct = null;
 let isDragging = false;
 let clickedObject;
 const mouse = new THREE.Vector2();
@@ -35,11 +35,14 @@ export function clickEvent(event) {
   }
 
   if (intersects.length > 0) {
-    clickedObject = intersects[0].object; // Das angeklickte Objekt
+    if (productView === false) {
+      clickedObject = intersects[0].object; // Das angeklickte Objekt
+    }
     let topGroup = clickedObject;
     while (topGroup.parent && topGroup.parent !== scene) {
       topGroup = topGroup.parent;
     }
+
     if (!selectMode.value) {
       selectMode.value = true;
       savedPos.x = camera.position.x;
@@ -59,20 +62,42 @@ export function clickEvent(event) {
         topGroup.position.z
       );
     } else {
-      if (productView == false) {
+      if (productView === false) {
         productView = true;
         selectedProduct = clickedObject.clone();
         clickedObject.visible = false;
+        selectedProduct.geometry = clickedObject.geometry.clone();
         selectedProduct.geometry.center();
         activateProductView(selectedProduct);
         addRotationControls();
       } else if (productView) {
-        console.log(clickedObject.userData);
         if (clickedObject == selectedProduct) {
           console.log("fitting");
         }
       }
     }
+  }
+}
+
+export function selectedProductToCart() {
+  removeRotationControls();
+  if (selectedProduct) {
+    useAddProductToCart(selectedProduct, scaleAmount);
+    setTimeout(() => {
+      productView = false;
+    }, 200);
+  }
+}
+
+export function selectedProductToShelf() {
+  removeRotationControls();
+  if (selectedProduct) {
+    console.log(clickedObject);
+    clickedObject.visible = true;
+    deleteObjekt(selectedProduct);
+    setTimeout(() => {
+      productView = false;
+    }, 200);
   }
 }
 
@@ -92,7 +117,7 @@ function removeRotationControls() {
 function onMouseDown(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+  let mouseDownObj: THREE.Mesh;
   raycaster.setFromCamera(mouse, camera);
   let intersects;
   if (productView) {
@@ -101,16 +126,15 @@ function onMouseDown(event) {
     intersects = raycaster.intersectObjects(shelves);
   }
   if (intersects.length > 0) {
-    clickedObject = intersects[0].object;
+    mouseDownObj = intersects[0].object;
   }
-  if (clickedObject == selectedProduct) {
+  if (mouseDownObj == selectedProduct) {
     isDragging = true;
     previousMousePosition = { x: event.clientX, y: event.clientY };
   }
 }
 
 function onMouseUp() {
-  clickedObject = null;
   isDragging = false;
 }
 

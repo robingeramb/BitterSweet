@@ -36,7 +36,6 @@ onMounted(() => {
   window.addEventListener("mousemove", updateMousePosition);
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
-      console.log("Escape-Taste gedrückt!");
       threeJS.value.leaveSelectMode();
     }
   });
@@ -51,7 +50,9 @@ onBeforeUnmount(() => {
 * {
   padding: 0px;
   margin: 0px;
+  font-family: "Poppins";
 }
+
 body {
   overflow: hidden;
 }

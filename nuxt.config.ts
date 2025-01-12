@@ -6,6 +6,12 @@ export default defineNuxtConfig({
       target: "esnext", // Für WASM-Unterstützung
     },
   },
+  link: [
+    {
+      rel: "stylesheet",
+      href: "https://use.typekit.net/ayn0exx.css", // Adobe Fonts Link
+    },
+  ],
   compatibilityDate: "2024-11-01",
   devtools: { enabled: true },
   css: ["~/assets/css/main.css"],

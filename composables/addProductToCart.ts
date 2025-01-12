@@ -46,6 +46,7 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
 
   sugarCounter.value += clickedObject.userData.sugarAmount;
   productSelection.add(addedProduct);
-  clickedObject.visible = false;
+  deleteObjekt(clickedObject);
+
   return ref();
 };

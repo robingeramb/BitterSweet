@@ -187,9 +187,6 @@ async function setupScene(): Promise<void> {
       });
       wallFrontBodyCA.addShape(wallFrontCA);
 
-      console.log(wallLeftBodyCA.position);
-      console.log(wallRightBodyCA.position);
-
       /* productSelection.add(wallBackMesh);
       productSelection.add(wallFrontMesh);
       productSelection.add(wallRightMesh);
@@ -253,7 +250,6 @@ function renderLoop(): void {
   // Iteriere durch alle Objekte und aktualisiere Position und Rotation
   for (let [threeObj, cannonObj] of physicObjects) {
     threeObj.position.copy(cannonObj.position);
-    console.log(cannonObj);
     threeObj.quaternion.copy(cannonObj.quaternion);
   }
 
@@ -294,7 +290,8 @@ defineExpose({ leaveSelectMode });
   <canvas id="mountId" width="700" height="500" />
   <div class="fixed top-2 right-2 text-white font-semibold text-4xl">
     <p v-html="sugarCounter"></p>
-  </div
-  <ProductSelectMenu class="fixed top-2 right-2 text-white font-semibold text-4xl" />
-  
+  </div>
+  <ProductSelectMenu
+    class="fixed top-3/4 right-1/2 -translate-y-1/2 translate-x-1/2 text-white font-semibold text-4xl"
+  />
 </template>
