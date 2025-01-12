@@ -29,7 +29,6 @@ let _cubeCamera: CubeCamera;
 let _renderLoopId: number;
 let _floor: Mesh;
 let _roof: Mesh;
-let tasksDone: boolean;
 
 /* --- Constants --- */
 const floorLength: number = 20;
@@ -124,7 +123,7 @@ async function setupScene(): Promise<void> {
     cashRegister = await loadModel("kasse.glb");
     if (cashRegister) {
       cashRegister.scale.set(0.2, 0.2, 0.2);
-      cashRegister.position.set(1.5, 0.05, -16);
+      cashRegister.position.set(0.8, 0.07, -16);
       cashRegister.rotation.y = Math.PI / 2;
       cashRegister.traverse((child) => {
         child.castShadow = true;
@@ -132,7 +131,35 @@ async function setupScene(): Promise<void> {
       scene.add(cashRegister);
     }
   } catch (error) {
-    console.error("Failed to load shopping cart model:", error);
+    console.error("Failed to load shopping cashRegister:", error);
+  }
+  try {
+    let nudeln = await loadModel("nudeln.glb");
+    if (nudeln) {
+      nudeln.scale.set(0.1, 0.1, 0.1);
+      nudeln.position.set(1.5, 0.8, -16);
+      nudeln.rotation.y = Math.PI * 2;
+      nudeln.traverse((child) => {
+        child.castShadow = true;
+      });
+      scene.add(nudeln);
+    }
+  } catch (error) {
+    console.error("Failed to load shopping cashRegister:", error);
+  }
+  try {
+    let sauce = await loadModel("tomatensauce.glb");
+    if (sauce) {
+      sauce.scale.set(0.1, 0.1, 0.1);
+      sauce.position.set(-1, 0.8, -16);
+      sauce.rotation.y = Math.PI * 2;
+      sauce.traverse((child) => {
+        child.castShadow = true;
+      });
+      scene.add(sauce);
+    }
+  } catch (error) {
+    console.error("Failed to load shopping cashRegister:", error);
   }
 
   // Shelves and lights
@@ -144,7 +171,7 @@ async function setupScene(): Promise<void> {
 
   //Post-Proccessing
   postProcessing(cashRegister);
-  tasksDone = true;
+  //tasksDone = true;
   _renderLoopId = requestAnimationFrame(renderLoop);
 }
 
@@ -171,7 +198,7 @@ function renderLoop(): void {
     threeObj.quaternion.copy(cannonObj.quaternion);
   }
 
-  if (tasksDone) {
+  if (taskDone.value == true) {
     _composer.render();
   } else {
     _renderer.render(scene, camera);
@@ -192,9 +219,10 @@ onMounted((): void => {
   if (canvas.value) {
     canvas.value.width = window.innerWidth;
     canvas.value.height = window.innerHeight;
-    window.addEventListener("click", (event: MouseEvent) =>
-      clickEvent(event, selectMode.value)
-    );
+    window.addEventListener("click", (event: MouseEvent) => {
+      clickEvent(event, selectMode.value);
+      clickCheckout(event, cashRegister);
+    });
     setupScene();
   }
 });

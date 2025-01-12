@@ -37,6 +37,8 @@ export const raycaster = new Raycaster();
 export const mouse = new Vector2();
 export const sugarCounter = ref(0);
 export const clock = new Clock();
+export let addedProductsInCart = ref(0);
+export let taskDone = ref(false);
 
 export function useThree() {
   function initThree(canvasMountId: string) {

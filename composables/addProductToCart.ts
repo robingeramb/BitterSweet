@@ -49,5 +49,11 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   productSelection.add(addedProduct);
   deleteObjekt(clickedObject);
 
+  // Aufgabe erfüllt
+  addedProductsInCart.value++; 
+  if(addedProductsInCart.value >= 5) {
+    taskDone.value = true;
+  } 
+
   return ref();
 };
