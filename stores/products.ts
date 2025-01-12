@@ -20,10 +20,11 @@ export const useProductsStore = defineStore({
       },
       {
         sugarAmount: 20,
-        name: "Soda",
-        amount: 330,
+        name: "Penne Rigatte Nudeln",
+        amount: 500,
+        model: "Nudeln.glb",
         amountPerPortion: 330,
-        category: "beverage",
+        category: "noodles",
       },
       {
         sugarAmount: 0,

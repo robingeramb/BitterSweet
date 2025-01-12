@@ -1,7 +1,11 @@
 import * as THREE from "three";
 import { useProductsStore } from "~/stores/products";
 
-export function createShelve(height: number, length: number, width: number) {
+export async function createShelve(
+  height: number,
+  length: number,
+  width: number
+) {
   const shelf = new THREE.Group();
   const material = new THREE.MeshStandardMaterial({ color: 0x454545 }); // Regal-Material (Holzfarbe)
   const bottomMaterial = new THREE.MeshStandardMaterial({ color: 0xfffeee });
@@ -25,7 +29,7 @@ export function createShelve(height: number, length: number, width: number) {
     board.castShadow = true;
     board.receiveShadow = true;
 
-    const products = createProducts(width, length, productList);
+    const products = await createProducts(width, length, productList);
     products.translateY(height * 0.0125);
     products.translateX(-0.5 * length);
     productBoard.add(products);

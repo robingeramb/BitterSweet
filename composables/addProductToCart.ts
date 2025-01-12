@@ -3,7 +3,8 @@ import * as THREE from "three";
 
 export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   let addedProduct = clickedObject.clone();
-  addedProduct.scale.set(scaleAmount, scaleAmount, scaleAmount);
+  let s = clickedObject.scale.x;
+  addedProduct.scale.set(scaleAmount * s, scaleAmount * s, scaleAmount * s);
   addedProduct.geometry.computeBoundingBox();
   const dimensions = addedProduct.geometry.boundingBox.getSize(
     new THREE.Vector3()
@@ -13,9 +14,9 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
 
   const boxShape = new CANNON.Box(
     new CANNON.Vec3(
-      (dimensions.x * scaleAmount) / 2,
-      (dimensions.y * scaleAmount) / 2,
-      (dimensions.z * scaleAmount) / 2
+      (dimensions.x * scaleAmount * s) / 2,
+      (dimensions.y * scaleAmount * s) / 2,
+      (dimensions.z * scaleAmount * s) / 2
     )
   ); // Rechteckige Box (2x1x0.5)
 

@@ -1,4 +1,3 @@
-import CANNON from "cannon";
 import * as THREE from "three";
 
 const productsGrid = [
@@ -13,11 +12,14 @@ const productsGrid = [
   { x: 1, z: 1 },
 ];
 
-const scaleAmount = 0.3;
-let productView = false;
-export let selectedProduct = null;
+const scaleAmount = 0.5;
+export let productView = ref(false);
+export let selectedProduct = ref();
+export let hoveredProduct = ref();
 let isDragging = false;
 let clickedObject;
+export const hoveredMouseX = ref();
+export const hoveredMouseY = ref();
 const mouse = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
 let previousMousePosition = { x: 0, y: 0 };
@@ -28,15 +30,15 @@ export function clickEvent(event) {
 
   raycaster.setFromCamera(mouse, camera);
   let intersects;
-  if (productView) {
+  if (productView.value) {
     intersects = raycaster.intersectObjects([selectedProduct]);
   } else {
     intersects = raycaster.intersectObjects(shelves);
   }
 
   if (intersects.length > 0) {
-    if (productView === false) {
-      clickedObject = intersects[0].object; // Das angeklickte Objekt
+    if (productView.value === false) {
+      clickedObject = intersects[0].object;
     }
     let topGroup = clickedObject;
     while (topGroup.parent && topGroup.parent !== scene) {
@@ -45,6 +47,7 @@ export function clickEvent(event) {
 
     if (!selectMode.value) {
       selectMode.value = true;
+      productHover();
       savedPos.x = camera.position.x;
       savedPos.y = camera.position.y;
       savedPos.z = camera.position.z;
@@ -62,15 +65,16 @@ export function clickEvent(event) {
         topGroup.position.z
       );
     } else {
-      if (productView === false) {
-        productView = true;
+      if (productView.value === false) {
+        productView.value = true;
         selectedProduct = clickedObject.clone();
+        selectedProduct.scale.copy(clickedObject.scale);
         clickedObject.visible = false;
         selectedProduct.geometry = clickedObject.geometry.clone();
         selectedProduct.geometry.center();
         activateProductView(selectedProduct);
         addRotationControls();
-      } else if (productView) {
+      } else if (productView.value) {
         if (clickedObject == selectedProduct) {
           console.log("fitting");
         }
@@ -79,12 +83,16 @@ export function clickEvent(event) {
   }
 }
 
+export function productHover() {
+  window.addEventListener("mousemove", checkOverProduct);
+}
+
 export function selectedProductToCart() {
   removeRotationControls();
   if (selectedProduct) {
     useAddProductToCart(selectedProduct, scaleAmount);
     setTimeout(() => {
-      productView = false;
+      productView.value = false;
     }, 200);
   }
 }
@@ -92,12 +100,28 @@ export function selectedProductToCart() {
 export function selectedProductToShelf() {
   removeRotationControls();
   if (selectedProduct) {
-    console.log(clickedObject);
     clickedObject.visible = true;
     deleteObjekt(selectedProduct);
     setTimeout(() => {
-      productView = false;
+      productView.value = false;
     }, 200);
+  }
+}
+
+function checkOverProduct(event: MouseEvent) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+  hoveredMouseX.value = event.clientX;
+  hoveredMouseY.value = event.clientY;
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(shelves);
+  if (intersects.length > 0) {
+    let hoveredObject = intersects[0].object;
+    if (hoveredObject.userData && hoveredObject.userData.name != undefined) {
+      hoveredProduct.value = hoveredObject.userData.name;
+    } else {
+      hoveredProduct.value = undefined;
+    }
   }
 }
 
@@ -109,18 +133,19 @@ function addRotationControls() {
 }
 
 function removeRotationControls() {
+  window.removeEventListener("mousemove", checkOverProduct);
   window.removeEventListener("mousedown", onMouseDown);
   window.removeEventListener("mouseup", onMouseUp);
   window.removeEventListener("mousemove", onMouseMove);
 }
 
-function onMouseDown(event) {
+function onMouseDown(event: MouseEvent) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
   let mouseDownObj: THREE.Mesh;
   raycaster.setFromCamera(mouse, camera);
   let intersects;
-  if (productView) {
+  if (productView.value) {
     intersects = raycaster.intersectObjects([selectedProduct]);
   } else {
     intersects = raycaster.intersectObjects(shelves);
@@ -138,7 +163,7 @@ function onMouseUp() {
   isDragging = false;
 }
 
-function onMouseMove(event) {
+function onMouseMove(event: MouseEvent) {
   if (!isDragging || !selectedProduct) return;
 
   const deltaX = event.clientX - previousMousePosition.x;

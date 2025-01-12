@@ -1,6 +1,6 @@
 export const shelves = [];
 
-export function createShelves(
+export async function createShelves(
   x: number,
   floorLength: number,
   shelfWidth: number,
@@ -9,7 +9,7 @@ export function createShelves(
   shelfHeight: number
 ) {
   for (let index = 0; index < floorLength / (shelfWidth + dist); index++) {
-    const shelf = createShelve(shelfHeight, shelfWidth, shelfLength);
+    const shelf = await createShelve(shelfHeight, shelfWidth, shelfLength);
 
     // Position des Regals berechnen
     shelf.position.x = x; // Regale entlang der X-Achse platzieren

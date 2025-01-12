@@ -1,9 +1,7 @@
 <script setup lang="ts">
 /* --- Imports --- */
-import CANNON from "cannon";
 import { useThree, camera, scene } from "@/composables/useThree";
 import { useMoveCamera } from "@/composables/moveCamera";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import {
   BoxGeometry,
   Mesh,
@@ -13,7 +11,6 @@ import {
   WebGLCubeRenderTarget,
   LinearMipmapLinearFilter,
 } from "three";
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 
 /* --- Props --- */
 interface Props {
@@ -28,12 +25,10 @@ let shoppingCart: Mesh | null = null;
 let cashRegister: Mesh;
 let _cubeRenderTarget: WebGLCubeRenderTarget;
 let _renderer: WebGLRenderer;
-
 let _cubeCamera: CubeCamera;
 let _renderLoopId: number;
 let _floor: Mesh;
 let _roof: Mesh;
-
 let tasksDone: boolean;
 
 /* --- Constants --- */
@@ -71,23 +66,10 @@ function createCubeCamera(): void {
   _cubeCamera = new CubeCamera(1, 100000, _cubeRenderTarget);
 }
 
-async function loadModel(name: string): Promise<Mesh | null> {
-  const loader = new GLTFLoader();
-  return new Promise((resolve, reject) => {
-    loader.load(
-      `/models/${name}`,
-      (gltf) => resolve(gltf.scene as Mesh),
-      undefined,
-      (error) => reject(error)
-    );
-  });
-}
-
 async function setupScene(): Promise<void> {
   const { renderer } = initThree("mountId");
   _renderer = renderer;
-  
-  
+
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
@@ -130,86 +112,13 @@ async function setupScene(): Promise<void> {
       });
       scene.add(shoppingCart);
 
-      const x = 0.35;
-      const y = 0.3;
-      const z = 0.7;
-      const h = 0.1;
-
-      // Visualisiere das Box-Objekt mit Three.js
-      const geometry = new BoxGeometry(x, h, z); // Maßstab in Three.js
-      const material = new MeshStandardMaterial({
-        color: 0xff0000,
-        opacity: 0,
-        transparent: true,
-      });
-      const mesh = new Mesh(geometry, material);
-      mesh.position.set(0, -h / 2, 0);
-
-      const boxShape = new CANNON.Box(new CANNON.Vec3(x, h / 2, z)); // Rechteckige Box (2x1x0.5)
-      const boxBody = new CANNON.Body({
-        mass: 0, // Die Masse des Körpers
-        position: new CANNON.Vec3(0, -h / 2, 0), // Anfangsposition (x, y, z)
-      });
-      boxBody.addShape(boxShape);
-
-      const wallRight = new BoxGeometry(h, y, z); // Maßstab in Three.js
-      const wallRightMesh = new Mesh(wallRight, material);
-      wallRightMesh.position.set(-x / 2 - h / 2, y / 2, 0);
-      const wallRightCA = new CANNON.Box(new CANNON.Vec3(h / 2, y / 2, z / 2)); // Rechteckige Box (2x1x0.5)
-      const wallRightBodyCA = new CANNON.Body({
-        mass: 0, // Die Masse des Körpers
-        position: new CANNON.Vec3(-x / 2 - h / 2, y / 2, 0), // Anfangsposition (x, y, z)
-      });
-      wallRightBodyCA.addShape(wallRightCA);
-
-      const wallLeftMesh = new Mesh(wallRight, material);
-      wallLeftMesh.position.set(x / 2 + h / 2, y / 2, 0);
-
-      const wallLeftCA = new CANNON.Box(new CANNON.Vec3(h / 2, y / 2, z / 2)); // Rechteckige Box (2x1x0.5)
-      const wallLeftBodyCA = new CANNON.Body({
-        mass: 0, // Die Masse des Körpers
-        position: new CANNON.Vec3(x / 2 + h / 2, y / 2, 0), // Anfangsposition (x, y, z)
-      });
-      wallLeftBodyCA.addShape(wallLeftCA);
-
-      const wallBack = new BoxGeometry(x, y, h); // Maßstab in Three.js
-      const wallBackMesh = new Mesh(wallBack, material);
-      wallBackMesh.position.set(0, y / 2, -z / 2 - h / 2);
-
-      const wallBackCA = new CANNON.Box(new CANNON.Vec3(x / 2, y / 2, h / 2)); // Rechteckige Box (2x1x0.5)
-      const wallBackBodyCA = new CANNON.Body({
-        mass: 0, // Die Masse des Körpers
-        position: new CANNON.Vec3(0, y / 2, -z / 2 - h / 2), // Anfangsposition (x, y, z)
-      });
-      wallBackBodyCA.addShape(wallBackCA);
-
-      const wallFrontMesh = new Mesh(wallBack, material);
-      wallFrontMesh.position.set(0, y / 2, z / 2 + h / 2);
-
-      const wallFrontCA = new CANNON.Box(new CANNON.Vec3(x / 2, y / 2, h / 2)); // Rechteckige Box (2x1x0.5)
-      const wallFrontBodyCA = new CANNON.Body({
-        mass: 0, // Die Masse des Körpers
-        position: new CANNON.Vec3(0, y / 2, z / 2 + h / 2), // Anfangsposition (x, y, z)
-      });
-      wallFrontBodyCA.addShape(wallFrontCA);
-
-      /* productSelection.add(wallBackMesh);
-      productSelection.add(wallFrontMesh);
-      productSelection.add(wallRightMesh);
-      productSelection.add(wallLeftMesh);
-      productSelection.add(mesh);*/
-
-      world.addBody(boxBody);
-      world.addBody(wallFrontBodyCA);
-      world.addBody(wallBackBodyCA);
-      world.addBody(wallLeftBodyCA);
-      world.addBody(wallRightBodyCA);
+      generateShoppingCartBorderBox();
     }
   } catch (error) {
     console.error("Failed to load shopping cart model:", error);
   }
 
-   // cashRegister
+  // cashRegister
 
   try {
     cashRegister = await loadModel("kasse.glb");
@@ -233,14 +142,13 @@ async function setupScene(): Promise<void> {
   const lights = createLights(floorLength, shelfWidth, shelfLength, dist);
   scene.add(lights);
 
-   //Post-Proccessing
-   postProcessing(cashRegister)
+  //Post-Proccessing
+  postProcessing(cashRegister);
   tasksDone = true;
   _renderLoopId = requestAnimationFrame(renderLoop);
 }
 
 function renderLoop(): void {
-
   _cubeCamera.position.copy(camera.position);
   _cubeCamera.update(_renderer, scene);
   if (shoppingCart && !selectMode.value) {
@@ -263,13 +171,12 @@ function renderLoop(): void {
     threeObj.quaternion.copy(cannonObj.quaternion);
   }
 
-  if(tasksDone) {
+  if (tasksDone) {
     _composer.render();
   } else {
     _renderer.render(scene, camera);
   }
   _renderLoopId = requestAnimationFrame(renderLoop);
-
 }
 
 function leaveSelectMode(): void {
@@ -306,7 +213,5 @@ defineExpose({ leaveSelectMode });
   <div class="fixed top-2 right-2 text-white font-semibold text-4xl">
     <p v-html="sugarCounter"></p>
   </div>
-  <ProductSelectMenu
-    class="fixed top-3/4 right-1/2 -translate-y-1/2 translate-x-1/2 text-white font-semibold text-4xl"
-  />
+  <ProductSelectMenu v-if="selectMode" />
 </template>

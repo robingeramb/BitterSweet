@@ -1,4 +1,5 @@
 <template>
+  <Countdown />
   <Box ref="threeJS" :mousePos="mousePosition" :scrollVal="scrollValue" />
 </template>
 <script setup lang="ts">
@@ -37,6 +38,7 @@ onMounted(() => {
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       threeJS.value.leaveSelectMode();
+      selectedProductToShelf();
     }
   });
 });
