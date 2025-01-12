@@ -13,6 +13,7 @@ import {
   WebGLCubeRenderTarget,
   LinearMipmapLinearFilter,
 } from "three";
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 
 /* --- Props --- */
 interface Props {
@@ -24,12 +25,16 @@ const props = defineProps<Props>();
 
 /* --- Reactive Variables and References --- */
 let shoppingCart: Mesh | null = null;
+let cashRegister: Mesh;
 let _cubeRenderTarget: WebGLCubeRenderTarget;
 let _renderer: WebGLRenderer;
+
 let _cubeCamera: CubeCamera;
 let _renderLoopId: number;
 let _floor: Mesh;
 let _roof: Mesh;
+
+let tasksDone: boolean;
 
 /* --- Constants --- */
 const floorLength: number = 20;
@@ -81,7 +86,8 @@ async function loadModel(name: string): Promise<Mesh | null> {
 async function setupScene(): Promise<void> {
   const { renderer } = initThree("mountId");
   _renderer = renderer;
-
+  
+  
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
@@ -203,18 +209,18 @@ async function setupScene(): Promise<void> {
     console.error("Failed to load shopping cart model:", error);
   }
 
-  // Counter
+   // cashRegister
 
   try {
-    let counter = await loadModel("kasse.glb");
-    if (counter) {
-      counter.scale.set(0.2, 0.2, 0.2);
-      counter.position.set(1.5, 0.05, -16);
-      counter.rotation.y = Math.PI / 2;
-      counter.traverse((child) => {
+    cashRegister = await loadModel("kasse.glb");
+    if (cashRegister) {
+      cashRegister.scale.set(0.2, 0.2, 0.2);
+      cashRegister.position.set(1.5, 0.05, -16);
+      cashRegister.rotation.y = Math.PI / 2;
+      cashRegister.traverse((child) => {
         child.castShadow = true;
       });
-      scene.add(counter);
+      scene.add(cashRegister);
     }
   } catch (error) {
     console.error("Failed to load shopping cart model:", error);
@@ -227,10 +233,14 @@ async function setupScene(): Promise<void> {
   const lights = createLights(floorLength, shelfWidth, shelfLength, dist);
   scene.add(lights);
 
+   //Post-Proccessing
+   postProcessing(cashRegister)
+  tasksDone = true;
   _renderLoopId = requestAnimationFrame(renderLoop);
 }
 
 function renderLoop(): void {
+
   _cubeCamera.position.copy(camera.position);
   _cubeCamera.update(_renderer, scene);
   if (shoppingCart && !selectMode.value) {
@@ -253,8 +263,13 @@ function renderLoop(): void {
     threeObj.quaternion.copy(cannonObj.quaternion);
   }
 
-  _renderer.render(scene, camera);
+  if(tasksDone) {
+    _composer.render();
+  } else {
+    _renderer.render(scene, camera);
+  }
   _renderLoopId = requestAnimationFrame(renderLoop);
+
 }
 
 function leaveSelectMode(): void {
