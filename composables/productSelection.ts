@@ -13,20 +13,31 @@ const productsGrid = [
   { x: 1, z: 1 },
 ];
 
-let productGridCounter = 0;
 const scaleAmount = 0.3;
+let productView = false;
+let selectedProduct = null;
+let isDragging = false;
+let clickedObject;
+const mouse = new THREE.Vector2();
+const raycaster = new THREE.Raycaster();
+let previousMousePosition = { x: 0, y: 0 };
 
 export function clickEvent(event) {
   mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
   mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
   raycaster.setFromCamera(mouse, camera);
-  const intersects = raycaster.intersectObjects(shelves);
+  let intersects;
+  if (productView) {
+    intersects = raycaster.intersectObjects([selectedProduct]);
+  } else {
+    intersects = raycaster.intersectObjects(shelves);
+  }
 
   if (intersects.length > 0) {
-    const clickedObject = intersects[0].object; // Das angeklickte Objekt
+    clickedObject = intersects[0].object; // Das angeklickte Objekt
     let topGroup = clickedObject;
-    while (topGroup.parent && topGroup.parent != scene) {
+    while (topGroup.parent && topGroup.parent !== scene) {
       topGroup = topGroup.parent;
     }
     if (!selectMode.value) {
@@ -48,47 +59,68 @@ export function clickEvent(event) {
         topGroup.position.z
       );
     } else {
-      let addedProduct = clickedObject.clone();
-      addedProduct.scale.set(scaleAmount, scaleAmount, scaleAmount);
-      addedProduct.geometry.computeBoundingBox();
-      const dimensions = addedProduct.geometry.boundingBox.getSize(
-        new THREE.Vector3()
-      );
-      console.log(dimensions);
-      addedProduct.position.set(0, 2, 0);
-
-      const boxShape = new CANNON.Box(
-        new CANNON.Vec3(
-          (dimensions.x * scaleAmount) / 2,
-          (dimensions.y * scaleAmount) / 2,
-          (dimensions.z * scaleAmount) / 2
-        )
-      ); // Rechteckige Box (2x1x0.5)
-
-      // Erstelle ein physikalisches Objekt (Body)
-      const boxBody = new CANNON.Body({
-        mass: 1, // Die Masse des Körpers
-        linearDamping: 0.3, // Reduziert lineare Geschwindigkeit
-        angularDamping: 0.3, // Reduziert Rotation
-        position: new CANNON.Vec3(0, 2, 0), // Anfangsposition (x, y, z)
-      });
-
-      boxBody.sleepSpeedLimit = 0.1;
-
-      // Füge das Shape zum Body hinzu
-      boxBody.addShape(boxShape);
-
-      // Füge den Body zur Welt hinzu
-      world.addBody(boxBody);
-      physicObjects.set(addedProduct, boxBody);
-      addedProduct.translateX(0);
-      addedProduct.translateY(0);
-      addedProduct.translateZ(0);
-      productGridCounter++;
-      sugarCounter.value += clickedObject.userData.sugarAmount;
-      productSelection.add(addedProduct);
-      clickedObject.visible = false;
+      if (productView == false) {
+        productView = true;
+        selectedProduct = clickedObject.clone();
+        clickedObject.visible = false;
+        selectedProduct.geometry.center();
+        activateProductView(selectedProduct);
+        addRotationControls();
+      } else if (productView) {
+        console.log(clickedObject.userData);
+        if (clickedObject == selectedProduct) {
+          console.log("fitting");
+        }
+      }
     }
-    // Ändere die Farbe des Objekts
   }
+}
+
+// Funktion zur Steuerung der Rotation hinzufügen
+function addRotationControls() {
+  window.addEventListener("mousedown", onMouseDown);
+  window.addEventListener("mouseup", onMouseUp);
+  window.addEventListener("mousemove", onMouseMove);
+}
+
+function removeRotationControls() {
+  window.removeEventListener("mousedown", onMouseDown);
+  window.removeEventListener("mouseup", onMouseUp);
+  window.removeEventListener("mousemove", onMouseMove);
+}
+
+function onMouseDown(event) {
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  let intersects;
+  if (productView) {
+    intersects = raycaster.intersectObjects([selectedProduct]);
+  } else {
+    intersects = raycaster.intersectObjects(shelves);
+  }
+  if (intersects.length > 0) {
+    clickedObject = intersects[0].object;
+  }
+  if (clickedObject == selectedProduct) {
+    isDragging = true;
+    previousMousePosition = { x: event.clientX, y: event.clientY };
+  }
+}
+
+function onMouseUp() {
+  clickedObject = null;
+  isDragging = false;
+}
+
+function onMouseMove(event) {
+  if (!isDragging || !selectedProduct) return;
+
+  const deltaX = event.clientX - previousMousePosition.x;
+
+  // Rotation um den eigenen Mittelpunkt (nur Y-Achse)
+  selectedProduct.rotation.y += deltaX * 0.01;
+
+  previousMousePosition = { x: event.clientX, y: event.clientY };
 }

@@ -24,7 +24,6 @@ const props = defineProps<Props>();
 
 /* --- Reactive Variables and References --- */
 let shoppingCart: Mesh | null = null;
-const sugarCounter = ref<number>(0);
 let _cubeRenderTarget: WebGLCubeRenderTarget;
 let _renderer: WebGLRenderer;
 let _cubeCamera: CubeCamera;
@@ -246,7 +245,10 @@ function renderLoop(): void {
       productSelection.position.set(0, 0.42, camera.position.z - 0.45);
     }
   }
-  world.step(1 / 60); // Update Cannon.js physics world
+  const fixedTimeStep = 1 / 120; // 120 FPS
+  const maxSubSteps = 10; // Maximale Unterteilungen pro Frame
+  const deltaTime = clock.getDelta();
+  world.step(fixedTimeStep, deltaTime, maxSubSteps);
 
   // Iteriere durch alle Objekte und aktualisiere Position und Rotation
   for (let [threeObj, cannonObj] of physicObjects) {
@@ -292,5 +294,7 @@ defineExpose({ leaveSelectMode });
   <canvas id="mountId" width="700" height="500" />
   <div class="fixed top-2 right-2 text-white font-semibold text-4xl">
     <p v-html="sugarCounter"></p>
-  </div>
+  </div
+  <ProductSelectMenu class="fixed top-2 right-2 text-white font-semibold text-4xl" />
+  
 </template>

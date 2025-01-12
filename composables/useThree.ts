@@ -12,6 +12,7 @@ import {
   Raycaster,
   Vector2,
   Vector3,
+  Clock,
   PCFSoftShadowMap,
 } from "three";
 import CANNON from "cannon";
@@ -31,7 +32,8 @@ export let savedPos = new Vector3();
 export let selectMode = ref(false);
 export const raycaster = new Raycaster();
 export const mouse = new Vector2();
-export const sugarCounter = ref();
+export const sugarCounter = ref(0);
+export const clock = new Clock();
 
 export function useThree() {
   function initThree(canvasMountId: string) {
@@ -61,6 +63,10 @@ export function useThree() {
     world.defaultContactMaterial = contactMaterial;
     world.broadphase = new CANNON.SAPBroadphase(world);
     world.allowSleep = true; // Lässt inaktive Körper "einschlafen"
+    world.defaultContactMaterial.contactEquationStiffness = 1e9;
+    world.defaultContactMaterial.contactEquationRelaxation = 3;
+    world.defaultContactMaterial.frictionEquationStiffness = 1e8;
+    world.defaultContactMaterial.frictionEquationRelaxation = 3;
 
     // Add an object to illuminate
 
