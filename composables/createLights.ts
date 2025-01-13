@@ -9,20 +9,14 @@ export async function createLights(
 ) {
   const lights = new THREE.Group();
   const lightModel = await loadModel("supermarket_lamp.glb");
-  const stencilGeometry = new THREE.SphereGeometry(0.16, 32, 32);
+  const stencilGeometry = new THREE.CylinderGeometry(0.18, 0.18, 0.1, 30);
   const stencilMaterial = new THREE.MeshStandardMaterial({
     color: new THREE.Color(0xfff000),
-    colorWrite: true, // Das Modell selbst wird nicht sichtbar
-    depthWrite: false, // Kein Tiefenpuffer schreiben
-    stencilWrite: true, // Schreiboperation für den Stencil Buffer
-    stencilFunc: THREE.AlwaysStencilFunc,
-    stencilRef: 1,
-    stencilFail: THREE.KeepStencilOp,
-    stencilZFail: THREE.KeepStencilOp,
-    stencilZPass: THREE.ReplaceStencilOp,
   });
   const stencil = new THREE.Mesh(stencilGeometry, stencilMaterial);
-
+  stencil.material.transparent = !0;
+  stencil.material.opacity = 0;
+  stencil.renderOrder = -1;
   for (
     let index = 0;
     index < floorLength / ((shelfWidth + dist) * 2);
@@ -36,18 +30,19 @@ export async function createLights(
 
     const rectLightHelper = new RectAreaLightHelper(rectAreaLight); // Helper to visualize the light
     rectAreaLight.add(rectLightHelper);
-    const spotLight = new THREE.PointLight(0xffffff, 16, 20);
+    const spotLight = new THREE.PointLight(0xffffff, 26, 20);
+    spotLight.position.set(0, 0.049, 0);
 
     spotLight.castShadow = true;
     spotLight.shadow.mapSize.width = 2048; // Höhere Auflösung für schärfere Schatten
     spotLight.shadow.mapSize.height = 2048;
 
-    light.position.set(0, -0.05, 0);
+    light.position.set(0, -0.04, 0);
     light.scale.set(2, 2, 2);
 
     lightGroup.add(spotLight);
     const stencil2 = stencil.clone();
-    stencil2.position.set(0, 0.1, 0);
+    stencil2.position.set(0, 0.0999, 0);
     lightGroup.add(stencil2);
     lightGroup.add(light);
     //lightGroup.add(glassContainer);

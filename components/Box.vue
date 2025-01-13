@@ -103,7 +103,7 @@ async function setupScene(): Promise<void> {
 
   // Optional: Height Map (Displacement)
   const displacementMap = textureLoader.load(
-    "/models/ceramic_tiles_seashell/ceramic_tiles_seashell_height.png"
+    "/models/textures/ceramic_tiles_seashell_height.png"
   );
 
   const repeatFactor = 16; // Anzahl der Wiederholungen in X- und Y-Richtung
@@ -123,6 +123,10 @@ async function setupScene(): Promise<void> {
   metallicMap.wrapT = RepeatWrapping;
   metallicMap.repeat.set(repeatFactor, repeatFactor);
 
+  displacementMap.wrapS = RepeatWrapping;
+  displacementMap.wrapT = RepeatWrapping;
+  displacementMap.repeat.set(repeatFactor, repeatFactor);
+
   const shoplight = await loadEXR("phone_shop_4k.exr");
 
   // PBR-Material erstellen
@@ -134,7 +138,7 @@ async function setupScene(): Promise<void> {
     //envMap: shoplight,
     //envMapIntensity: 0.0,
     displacementMap: displacementMap, // Optional
-    displacementScale: 0.1, // Stärke der Höhenanpassung
+    displacementScale: 1, // Stärke der Höhenanpassung
   });
 
   ceramicMaterial.metalness = 1; // Maximale metallische Eigenschaft
@@ -149,27 +153,68 @@ async function setupScene(): Promise<void> {
     envMapIntensity: 1,
   });
   _floor = new Mesh(floorGeometry, ceramicMaterial);
-  _floor.position.set(0, 0, -floorLength / 2);
+  _floor.position.set(0, -0.49, -floorLength / 2);
   _floor.receiveShadow = true;
   scene.add(_floor);
 
   // Roof
+  const roofBaseColor = textureLoader.load(
+    "/models/textures/tiles_0013_color_2k.jpg"
+  );
+  const roofNormalMap = textureLoader.load(
+    "/models/textures/tiles_0013_normal_opengl_2k.png"
+  );
+  const roofRoughnessMap = textureLoader.load(
+    "/models/textures/tiles_0013_roughness_2k.png"
+  );
+  const roofMetallicMap = textureLoader.load(
+    "/models/textures/tiles_0013_metallic_2k.png"
+  );
 
-  const roofGeometry = new BoxGeometry(10, 0.1, floorLength);
+  // Optional: Height Map (Displacement)
+  const roofDisplacementMap = textureLoader.load(
+    "/models/textures/tiles_0013_height_2k.png"
+  );
+
+  const roofRepeatFactor = 3; // Anzahl der Wiederholungen in X- und Y-Richtung
+  roofBaseColor.wrapS = RepeatWrapping; // Horizontale Wiederholung aktivieren
+  roofBaseColor.wrapT = RepeatWrapping; // Vertikale Wiederholung aktivieren
+  roofBaseColor.repeat.set(roofRepeatFactor, roofRepeatFactor); // Kachel-Wiederholungen setzen
+
+  roofNormalMap.wrapS = RepeatWrapping;
+  roofNormalMap.wrapT = RepeatWrapping;
+  roofNormalMap.repeat.set(roofRepeatFactor, roofRepeatFactor);
+
+  roofRoughnessMap.wrapS = RepeatWrapping;
+  roofRoughnessMap.wrapT = RepeatWrapping;
+  roofRoughnessMap.repeat.set(roofRepeatFactor, roofRepeatFactor);
+
+  roofMetallicMap.wrapS = RepeatWrapping;
+  roofMetallicMap.wrapT = RepeatWrapping;
+  roofMetallicMap.repeat.set(roofRepeatFactor, roofRepeatFactor);
+
+  roofDisplacementMap.wrapS = RepeatWrapping;
+  roofDisplacementMap.wrapT = RepeatWrapping;
+  roofDisplacementMap.repeat.set(roofRepeatFactor, roofRepeatFactor);
+
+  const roofGeometry = new BoxGeometry(floorLength, 0.1, floorLength);
   const roofMaterial = new MeshStandardMaterial({
-    color: 0xeeefee,
-    roughness: 0.5,
-    metalness: 0.5,
-    stencilWrite: true,
-    stencilFunc: NotEqualStencilFunc, // Render where stencil buffer is NOT equal to 1
-    stencilRef: 1,
-    stencilFail: KeepStencilOp,
-    stencilZFail: KeepStencilOp,
-    stencilZPass: KeepStencilOp,
+    map: roofBaseColor,
+    normalMap: roofNormalMap,
+    roughnessMap: roofRoughnessMap,
+    metalnessMap: roofMetallicMap,
+    //envMap: shoplight,
+    //envMapIntensity: 0.5,
+    displacementMap: roofDisplacementMap, // Optional
+    displacementScale: 0.1, // Stärke der Höhenanpassung
   });
+  roofMaterial.metalness = 0.1; // Maximale metallische Eigenschaft
+  roofMaterial.roughness = 0.1; // Mittlere Rauheit
+  roofMaterial.normalScale.set(0.7, 0.7); // Stärke der Normal Map
   _roof = new Mesh(roofGeometry, roofMaterial);
+  _roof.material.transparent = !0;
 
-  _roof.position.set(0, 3.1, -floorLength / 2);
+  _roof.position.set(0, 3.16, -floorLength / 2);
   scene.add(_roof);
 
   const metalNormalMap = textureLoader.load("/models/textures/Normals.png");
@@ -178,6 +223,7 @@ async function setupScene(): Promise<void> {
   );
   const metalBaseColor = textureLoader.load("/models/textures/BaseColor.png");
   const metalMetallicMap = textureLoader.load("/models/textures/Metallic.png");
+  const height = textureLoader.load("/models/textures/Height.png");
 
   const metal = new MeshStandardMaterial({
     map: metalBaseColor,

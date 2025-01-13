@@ -45,7 +45,7 @@ export let productsInCart = new Group();
 export function useThree() {
   function initThree(canvasMountId: string) {
     const canvas = document.getElementById(canvasMountId)! as HTMLCanvasElement;
-    const ambientLight = new AmbientLight(0xffffff, 0.5);
+    const ambientLight = new AmbientLight(0xffffff, 0.2);
 
     camera.position.set(0, 1, 4);
     camera.lookAt(0, 0, 0);

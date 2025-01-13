@@ -11,7 +11,7 @@ export function useMoveCamera() {
     if (!selectMode.value) {
       camera.position.z = z;
       //shoppingCart.value.position.set(0.717, 0.07, camera.position.z + 1);
-      camera.lookAt(currX.value, 3, camera.position.z);
+      camera.lookAt(currX.value, currY.value, camera.position.z - 4);
     }
 
     //_cubeCamera.position.z = _camera.position.z;
