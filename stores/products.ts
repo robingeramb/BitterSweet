@@ -42,7 +42,7 @@ export const useProductsStore = defineStore({
       },
       {
         sugarAmount: 7,
-        name: "Apple",
+        name: "Tomatensauce",
         amount: 150,
         amountPerPortion: 150,
         category: "fruit",

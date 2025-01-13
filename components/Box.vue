@@ -319,7 +319,7 @@ defineExpose({ leaveSelectMode });
 <template>
   <canvas id="mountId" width="700" height="500" />
   <div class="fixed top-2 right-2 text-white font-semibold text-4xl">
-    <p v-html="sugarCounter"></p>
+    <p v-if="!endScreen" v-html="sugarCounter"></p>
   </div>
   <ProductSelectMenu v-if="selectMode" />
 </template>
