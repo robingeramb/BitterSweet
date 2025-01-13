@@ -48,12 +48,26 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   sugarCounter.value += clickedObject.userData.sugarAmount;
   productSelection.add(addedProduct);
   deleteObjekt(clickedObject);
+  productsInCart.add(clickedObject);
+  productsInCart.children.forEach((child) => {
+    console.log(child);  // Zeigt die Objekte in der Konsole an
+  });
+
 
   // Aufgabe erfüllt
-  addedProductsInCart.value++; 
-  if(addedProductsInCart.value >= 1) {
+
+  const targetNames = ['Penne Rigatte Nudeln', 'Tomatensauce'];
+
+  const nameCount = productsInCart.children.reduce((count, child) => {
+    if (targetNames.includes(child.userData.name)) {
+      count++;
+    }
+    return count;
+  }, 0);
+  
+  if (nameCount >= 2) {
     taskDone.value = true;
-  } 
+  }
 
   return ref();
 };

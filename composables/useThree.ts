@@ -40,6 +40,7 @@ export const clock = new Clock();
 export let addedProductsInCart = ref(0);
 export let taskDone = ref(false);
 export let endScreen = ref(false);
+export let productsInCart = new Group();
 
 export function useThree() {
   function initThree(canvasMountId: string) {
@@ -86,7 +87,7 @@ export function useThree() {
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.physicallyCorrectLights = true; // Enable physical lighting
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
+    //renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
     _composer = new EffectComposer(renderer);
 
     return { renderer };
