@@ -1,8 +1,16 @@
 <template>
-  <Countdown />
+  <EndScreen v-if="endScreen" @restartFunction="setRestartFunction"/>
+  <Countdown ref="countdown"/>
   <Box ref="threeJS" :mousePos="mousePosition" :scrollVal="scrollValue" />
 </template>
 <script setup lang="ts">
+
+
+const countdown = ref();
+function setRestartFunction() {
+  countdown.value.restart();
+}
+
 const mousePosition = ref({ x: 0, y: 0 });
 const threeJS = ref(null);
 const updateMousePosition = (event) => {

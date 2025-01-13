@@ -51,7 +51,7 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
 
   // Aufgabe erfüllt
   addedProductsInCart.value++; 
-  if(addedProductsInCart.value >= 5) {
+  if(addedProductsInCart.value >= 1) {
     taskDone.value = true;
   } 
 

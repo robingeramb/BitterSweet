@@ -13,7 +13,7 @@ import {
   Vector2,
   Vector3,
   Clock,
-  PCFSoftShadowMap,
+  PCFSoftShadowMap
 } from "three";
 import CANNON from "cannon";
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -23,6 +23,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 export const world = new CANNON.World();
 
 import { disposeObject } from "@/utils/disposeUtils";
+import { ThreeMFLoader } from "three/examples/jsm/Addons.js";
 
 export const scene = new Scene();
 export let _composer: EffectComposer;
@@ -39,6 +40,7 @@ export const sugarCounter = ref(0);
 export const clock = new Clock();
 export let addedProductsInCart = ref(0);
 export let taskDone = ref(false);
+export let endScreen = ref(false);
 
 export function useThree() {
   function initThree(canvasMountId: string) {
