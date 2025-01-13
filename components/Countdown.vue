@@ -7,6 +7,7 @@
     >
       <div class="text-center">
         <h1 class="text-4xl mb-4">Bitter Sweet</h1>
+        <p class="bg-slate-600 p-10 rounded-md mb-4 text-slate-300">Deine Eltern kommen heute Abend zu Besuch. <br> Du möchtest eine gute Pasta für 3 Personen kochen und <br> brauchst noch Getränke und Snacks. <br> Du bist spät dran und hast nur 5 Minuten für den Einkauf.</p>
         <h1 class="text-4xl font-bold mb-4">{{ formattedTime }}</h1>
         <button
           @click="startCountdown"
