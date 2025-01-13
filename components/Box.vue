@@ -10,8 +10,13 @@ import {
   WebGLRenderer,
   WebGLCubeRenderTarget,
   TextureLoader,
+  NotEqualStencilFunc,
   LinearMipmapLinearFilter,
   RepeatWrapping,
+  CircleGeometry,
+  AlwaysStencilFunc,
+  KeepStencilOp,
+  ReplaceStencilOp,
 } from "three";
 
 /* --- Props --- */
@@ -75,6 +80,9 @@ async function setupScene(): Promise<void> {
   camera.updateProjectionMatrix();
 
   createCubeCamera();
+
+  const lights = await createLights(floorLength, shelfWidth, shelfLength, dist);
+  scene.add(lights);
 
   // Floor
   const textureLoader = new TextureLoader();
@@ -146,13 +154,21 @@ async function setupScene(): Promise<void> {
   scene.add(_floor);
 
   // Roof
+
   const roofGeometry = new BoxGeometry(10, 0.1, floorLength);
   const roofMaterial = new MeshStandardMaterial({
     color: 0xeeefee,
     roughness: 0.5,
     metalness: 0.5,
+    stencilWrite: true,
+    stencilFunc: NotEqualStencilFunc, // Render where stencil buffer is NOT equal to 1
+    stencilRef: 1,
+    stencilFail: KeepStencilOp,
+    stencilZFail: KeepStencilOp,
+    stencilZPass: KeepStencilOp,
   });
   _roof = new Mesh(roofGeometry, roofMaterial);
+
   _roof.position.set(0, 3.1, -floorLength / 2);
   scene.add(_roof);
 
@@ -245,9 +261,6 @@ async function setupScene(): Promise<void> {
   // Shelves and lights
   createShelves(-1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
   createShelves(1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
-
-  const lights = createLights(floorLength, shelfWidth, shelfLength, dist);
-  scene.add(lights);
 
   //Post-Proccessing
   postProcessing(cashRegister);

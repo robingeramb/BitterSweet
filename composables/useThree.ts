@@ -13,7 +13,7 @@ import {
   Vector2,
   Vector3,
   Clock,
-  PCFSoftShadowMap
+  PCFSoftShadowMap,
 } from "three";
 import CANNON from "cannon";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
@@ -79,6 +79,7 @@ export function useThree() {
     const renderer = new WebGLRenderer({
       canvas,
       antialias: true,
+      stencil: true,
       alpha: true,
     });
     renderer.shadowMap.enabled = true;
