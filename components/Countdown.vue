@@ -24,8 +24,8 @@
     >
       <div class="text-center">
         <h1 class="text-4xl font-bold mb-4">Game Over</h1>
-        <button
-          @click="restart"
+        <button 
+          @click="restart" 
           class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
         >
           Restart
@@ -35,7 +35,7 @@
 
     <!-- Countdown Timer in the Corner -->
     <div
-      v-if="started && !gameOver"
+      v-if="started && !gameOver && !endScreen"
       class="fixed top-2 min-w-24 right-1/2 translate-x-1/2 bg-gray-900 bg-opacity-50 text-white text-xl text-center font-medium px-4 py-2 rounded-full shadow"
     >
       {{ formattedTime }}
@@ -77,6 +77,8 @@ const formattedTime = computed(() => {
   const seconds = (time.value % 60).toString().padStart(2, "0");
   return `${minutes}:${seconds}`;
 });
+
+defineExpose({ restart });
 </script>
 
 <style scoped>

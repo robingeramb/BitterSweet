@@ -13,5 +13,8 @@ export function clickCheckout(event, selectedCheckout) {
 
     if(intersects.length > 0) {
         clickedObject = intersects[0].object;
+        if(taskDone.value == true) {
+            endScreen.value = true;
+        }
     }
 }
