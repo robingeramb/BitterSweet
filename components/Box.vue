@@ -9,7 +9,9 @@ import {
   CubeCamera,
   WebGLRenderer,
   WebGLCubeRenderTarget,
+  TextureLoader,
   LinearMipmapLinearFilter,
+  RepeatWrapping,
 } from "three";
 
 /* --- Props --- */
@@ -75,7 +77,62 @@ async function setupScene(): Promise<void> {
   createCubeCamera();
 
   // Floor
-  const floorGeometry = new BoxGeometry(10, 0.1, floorLength);
+  const textureLoader = new TextureLoader();
+
+  // Texturen laden
+  const baseColor = textureLoader.load(
+    "/models/textures/ceramic_tiles_seashell_basecolor.png"
+  );
+  const normalMap = textureLoader.load(
+    "/models/textures/ceramic_tiles_seashell_normal.png"
+  );
+  const roughnessMap = textureLoader.load(
+    "/models/textures/ceramic_tiles_seashell_roughness.png"
+  );
+  const metallicMap = textureLoader.load(
+    "/models/textures/ceramic_tiles_seashell_metallic.png"
+  );
+
+  // Optional: Height Map (Displacement)
+  const displacementMap = textureLoader.load(
+    "/models/ceramic_tiles_seashell/ceramic_tiles_seashell_height.png"
+  );
+
+  const repeatFactor = 16; // Anzahl der Wiederholungen in X- und Y-Richtung
+  baseColor.wrapS = RepeatWrapping; // Horizontale Wiederholung aktivieren
+  baseColor.wrapT = RepeatWrapping; // Vertikale Wiederholung aktivieren
+  baseColor.repeat.set(repeatFactor, repeatFactor); // Kachel-Wiederholungen setzen
+
+  normalMap.wrapS = RepeatWrapping;
+  normalMap.wrapT = RepeatWrapping;
+  normalMap.repeat.set(repeatFactor, repeatFactor);
+
+  roughnessMap.wrapS = RepeatWrapping;
+  roughnessMap.wrapT = RepeatWrapping;
+  roughnessMap.repeat.set(repeatFactor, repeatFactor);
+
+  metallicMap.wrapS = RepeatWrapping;
+  metallicMap.wrapT = RepeatWrapping;
+  metallicMap.repeat.set(repeatFactor, repeatFactor);
+
+  const shoplight = await loadEXR("phone_shop_4k.exr");
+
+  // PBR-Material erstellen
+  const ceramicMaterial = new MeshStandardMaterial({
+    map: baseColor,
+    normalMap: normalMap,
+    roughnessMap: roughnessMap,
+    metalnessMap: metallicMap,
+    //envMap: shoplight,
+    //envMapIntensity: 0.0,
+    displacementMap: displacementMap, // Optional
+    displacementScale: 0.1, // Stärke der Höhenanpassung
+  });
+
+  ceramicMaterial.metalness = 1; // Maximale metallische Eigenschaft
+  ceramicMaterial.roughness = 0.5; // Mittlere Rauheit
+  ceramicMaterial.normalScale.set(1, 1); // Stärke der Normal Map
+  const floorGeometry = new BoxGeometry(floorLength, 0.1, floorLength);
   const floorMaterial = new MeshStandardMaterial({
     color: 0xffffff,
     roughness: 0.1,
@@ -83,7 +140,7 @@ async function setupScene(): Promise<void> {
     envMap: _cubeRenderTarget.texture,
     envMapIntensity: 1,
   });
-  _floor = new Mesh(floorGeometry, floorMaterial);
+  _floor = new Mesh(floorGeometry, ceramicMaterial);
   _floor.position.set(0, 0, -floorLength / 2);
   _floor.receiveShadow = true;
   scene.add(_floor);
@@ -99,15 +156,38 @@ async function setupScene(): Promise<void> {
   _roof.position.set(0, 3.1, -floorLength / 2);
   scene.add(_roof);
 
+  const metalNormalMap = textureLoader.load("/models/textures/Normals.png");
+  const metalRoughnessMap = textureLoader.load(
+    "/models/textures/Roughness.png"
+  );
+  const metalBaseColor = textureLoader.load("/models/textures/BaseColor.png");
+  const metalMetallicMap = textureLoader.load("/models/textures/Metallic.png");
+
+  const metal = new MeshStandardMaterial({
+    map: metalBaseColor,
+    metalness: 1,
+    //normalMap: metalNormalMap,
+    roughnessMap: metalRoughnessMap,
+    //metalnessMap: metalMetallicMap,
+    roughness: 0.1,
+    envMap: shoplight,
+    envMapIntensity: 0.1,
+    displacementMap: displacementMap, // Optional
+    displacementScale: 0.1, // Stärke der Höhenanpassung
+  });
+
   // Shopping cart
   try {
-    shoppingCart = await loadModel("altspace_blue_shopping_cart.glb");
+    shoppingCart = await loadModel("shoppingcart.glb");
     if (shoppingCart) {
-      shoppingCart.scale.set(0.02, 0.02, 0.02);
-      shoppingCart.position.set(0.717, 0.07, 5);
-      shoppingCart.rotation.y = Math.PI / 2;
+      shoppingCart.scale.set(0.01, 0.01, 0.01);
+      shoppingCart.position.set(0, 0.95, -1);
+      //shoppingCart.rotation.y = Math.PI / 2;
       shoppingCart.traverse((child) => {
         child.castShadow = true;
+        if (child.material) {
+          child.material = metal;
+        }
       });
       scene.add(shoppingCart);
 
@@ -179,11 +259,11 @@ function renderLoop(): void {
   _cubeCamera.position.copy(camera.position);
   _cubeCamera.update(_renderer, scene);
   if (shoppingCart && !selectMode.value) {
-    shoppingCart.position.set(0.717, 0.07, camera.position.z + 1);
+    shoppingCart.position.set(0, 0.1, camera.position.z - 1);
     productSelection.position.set(0, 0.42, camera.position.z - 0.95);
   } else {
     if (shoppingCart && selectMode.value) {
-      shoppingCart.position.set(0.717, 0.07, camera.position.z + 1.5);
+      shoppingCart.position.set(0, 0.1, camera.position.z - 0.5);
       productSelection.position.set(0, 0.42, camera.position.z - 0.45);
     }
   }

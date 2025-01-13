@@ -38,6 +38,8 @@ export function createLights(
     const spotLight = new THREE.PointLight(0xffffff, 16, 20);
 
     spotLight.castShadow = true;
+    spotLight.shadow.mapSize.width = 2048; // Höhere Auflösung für schärfere Schatten
+    spotLight.shadow.mapSize.height = 2048;
 
     //spotLight.position.set(0, 3, -1 * (index * ((shelfLength + dist) * 2)));
     /*spotLight.target.position.set(
@@ -47,7 +49,7 @@ export function createLights(
     ); // Ensure light points at the center*/
     lightGroup.add(spotLight);
     //lightGroup.add(glassContainer);
-    lightGroup.add(rectAreaLight);
+    //lightGroup.add(rectAreaLight);
     lights.add(lightGroup);
   }
   return lights;

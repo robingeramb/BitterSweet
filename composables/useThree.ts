@@ -16,8 +16,7 @@ import {
   PCFSoftShadowMap,
 } from "three";
 import CANNON from "cannon";
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 
 // --- 2. Cannon.js Setup ---
 export const world = new CANNON.World();
@@ -83,8 +82,9 @@ export function useThree() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.physicallyCorrectLights = true; // Enable physical lighting
-
-    _composer = new EffectComposer(renderer)
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
+    _composer = new EffectComposer(renderer);
 
     return { renderer };
   }
