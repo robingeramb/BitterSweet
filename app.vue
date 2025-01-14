@@ -1,11 +1,10 @@
 <template>
-  <EndScreen v-if="endScreen" @restartFunction="setRestartFunction"/>
-  <Countdown ref="countdown"/>
+  <EndScreen v-if="endScreen" @restartFunction="setRestartFunction" />
+  <Countdown ref="countdown" @startSetup="startSetup" />
   <Box ref="threeJS" :mousePos="mousePosition" :scrollVal="scrollValue" />
 </template>
+
 <script setup lang="ts">
-
-
 const countdown = ref();
 function setRestartFunction() {
   countdown.value.restart();
@@ -18,7 +17,6 @@ const updateMousePosition = (event) => {
   mousePosition.value.y = event.clientY;
 };
 
-const scrollValue = ref(0);
 let scrollTimer = null;
 let lastScrollTime = 0;
 const scrollSpeed = 0.01;
@@ -40,11 +38,16 @@ const handleWheel = (event) => {
   lastScrollTime = currentTime;
 };
 
+function startSetup() {
+  threeJS.value.setupScene();
+}
+
 onMounted(() => {
   window.addEventListener("wheel", handleWheel);
   window.addEventListener("mousemove", updateMousePosition);
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
+      scrollValue.value = savedPos.z;
       threeJS.value.leaveSelectMode();
       selectedProductToShelf();
     }
@@ -60,7 +63,7 @@ onBeforeUnmount(() => {
 * {
   padding: 0px;
   margin: 0px;
-  font-family: "Poppins";
+  font-family: "Poppins", serif;
 }
 
 body {

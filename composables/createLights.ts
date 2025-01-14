@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { RectAreaLightHelper } from "three/examples/jsm/helpers/RectAreaLightHelper.js";
 
+export const spotLight = new THREE.SpotLight(0xffffff, 4, 1.4);
+
 export async function createLights(
   floorLength: number,
   shelfWidth: number,
@@ -30,7 +32,7 @@ export async function createLights(
 
     const rectLightHelper = new RectAreaLightHelper(rectAreaLight); // Helper to visualize the light
     rectAreaLight.add(rectLightHelper);
-    const spotLight = new THREE.PointLight(0xffffff, 26, 20);
+    const spotLight = new THREE.PointLight(0xfcfbed, 26, 20);
     spotLight.position.set(0, 0.049, 0);
 
     spotLight.castShadow = true;
@@ -49,5 +51,6 @@ export async function createLights(
     //lightGroup.add(rectAreaLight);
     lights.add(lightGroup);
   }
+  scene.add(spotLight);
   return lights;
 }

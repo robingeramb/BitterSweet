@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
-const rgbeLoader = new EXRLoader();
+const rgbeLoader = new EXRLoader(loadingManager);
 
 export function loadEXR(path: string): Promise<any> {
   return new Promise((resolve, reject) => {

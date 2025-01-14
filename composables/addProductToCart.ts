@@ -4,21 +4,36 @@ import * as THREE from "three";
 export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   let addedProduct = clickedObject.clone();
   let s = clickedObject.scale.x;
+  let boxShape;
   addedProduct.scale.set(scaleAmount * s, scaleAmount * s, scaleAmount * s);
-  addedProduct.geometry.computeBoundingBox();
-  const dimensions = addedProduct.geometry.boundingBox.getSize(
-    new THREE.Vector3()
-  );
+  let dimensions;
+  if (addedProduct.isMesh) {
+    addedProduct.geometry.computeBoundingBox();
+    dimensions = addedProduct.geometry.boundingBox.getSize(new THREE.Vector3());
+    boxShape = new CANNON.Box(
+      new CANNON.Vec3(
+        (dimensions.x * scaleAmount * s) / 2,
+        (dimensions.y * scaleAmount * s) / 2,
+        (dimensions.z * scaleAmount * s) / 2
+      )
+    ); // Rechteckige Box (2x1x0.5)
+  } else {
+    const boundingBox = new THREE.Box3().setFromObject(clickedObject);
+
+    // Maße extrahieren
+    dimensions = new THREE.Vector3();
+    boundingBox.getSize(dimensions); // Gibt die Breite, Höhe und Tiefe zurüc
+    boxShape = new CANNON.Box(
+      new CANNON.Vec3(
+        (dimensions.x * scaleAmount) / 2,
+        (dimensions.y * scaleAmount) / 2,
+        (dimensions.z * scaleAmount) / 2
+      )
+    ); // Rechteckige Box (2x1x0.5)
+  }
+
   console.log(dimensions);
   addedProduct.position.set(0, 2, 0);
-
-  const boxShape = new CANNON.Box(
-    new CANNON.Vec3(
-      (dimensions.x * scaleAmount * s) / 2,
-      (dimensions.y * scaleAmount * s) / 2,
-      (dimensions.z * scaleAmount * s) / 2
-    )
-  ); // Rechteckige Box (2x1x0.5)
 
   // Erstelle ein physikalisches Objekt (Body)
   const boxBody = new CANNON.Body({
@@ -49,23 +64,26 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   productSelection.add(addedProduct);
   deleteObjekt(clickedObject);
   productsInCart.add(clickedObject);
-  productsInCart.children.forEach((child) => {
-    console.log(child);  // Zeigt die Objekte in der Konsole an
-  });
-
+  productsInCart.children.forEach((child) => {});
 
   // Aufgabe erfüllt
 
-  const targetNames = ['Penne Rigatte Nudeln', 'Tomatensauce'];
+  const targetNames = ["Penne Rigatte Nudeln", "Tomatensauce"];
 
   const nameCount = productsInCart.children.reduce((count, child) => {
-    if (targetNames.includes(child.userData.name)) {
+    if (targetNames.includes(child.userData.productName)) {
       count++;
+      console.log(child.userData.category);
+      if (child.userData.category.toString() == "noodles") {
+        noodelsCheck.value = true;
+      } else {
+        sauceCheck.value = true;
+      }
     }
     return count;
   }, 0);
-  
-  if (nameCount >= 2) {
+
+  if (noodelsCheck.value && sauceCheck.value) {
     taskDone.value = true;
   }
 

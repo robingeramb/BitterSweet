@@ -26,7 +26,6 @@ export function postProcessing(cashRegister) {
   _composer.addPass(outlinePass);
   // RenderPass für die normale Szene
 
-  const textureLoader = new THREE.TextureLoader();
   textureLoader.load("textures/tri_pattern.jpg", function (texture) {
     outlinePass.patternTexture = texture;
     texture.wrapS = THREE.RepeatWrapping;

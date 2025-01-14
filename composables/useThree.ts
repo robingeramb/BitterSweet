@@ -8,6 +8,8 @@ import {
   Mesh,
   MeshStandardMaterial,
   AmbientLight,
+  LoadingManager,
+  TextureLoader,
   Group,
   Raycaster,
   Vector2,
@@ -41,6 +43,30 @@ export let addedProductsInCart = ref(0);
 export let taskDone = ref(false);
 export let endScreen = ref(false);
 export let productsInCart = new Group();
+export const loadingProgress = ref(0);
+export const loadingMessage = ref();
+export const loadedItems = ref(0);
+export const noodelsCheck = ref(false);
+export const scrollValue = ref(4);
+export const sauceCheck = ref(false);
+export const loadingManager = new LoadingManager(
+  // Callback: Wenn alles geladen ist
+  () => {
+    loadingMessage.value = "Alle Ressourcen geladen";
+  },
+  // Callback: Während des Ladens
+  (url, itemsLoaded, itemsTotal) => {
+    loadingMessage.value = `Lade ${url}: ${itemsLoaded} von ${itemsTotal}`;
+    loadingProgress.value = (itemsLoaded / itemsTotal) * 100;
+    loadedItems.value = itemsLoaded;
+  },
+  // Callback: Bei Fehlern
+  (url) => {
+    loadingMessage.value = `Fehler beim Laden von: ${url}`;
+    console.error(`Fehler beim Laden von: ${url}`);
+  }
+);
+export const textureLoader = new TextureLoader(loadingManager);
 
 export function useThree() {
   function initThree(canvasMountId: string) {
@@ -87,7 +113,7 @@ export function useThree() {
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.physicallyCorrectLights = true; // Enable physical lighting
     renderer.setSize(window.innerWidth, window.innerHeight);
-    //renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
+    renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
     _composer = new EffectComposer(renderer);
 
     return { renderer };

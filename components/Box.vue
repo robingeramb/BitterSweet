@@ -85,7 +85,6 @@ async function setupScene(): Promise<void> {
   scene.add(lights);
 
   // Floor
-  const textureLoader = new TextureLoader();
 
   // Texturen laden
   const baseColor = textureLoader.load(
@@ -144,7 +143,7 @@ async function setupScene(): Promise<void> {
   ceramicMaterial.metalness = 1; // Maximale metallische Eigenschaft
   ceramicMaterial.roughness = 0.5; // Mittlere Rauheit
   ceramicMaterial.normalScale.set(1, 1); // Stärke der Normal Map
-  const floorGeometry = new BoxGeometry(floorLength, 0.1, floorLength);
+  const floorGeometry = new BoxGeometry(floorLength + 4, 0.1, floorLength + 4);
   const floorMaterial = new MeshStandardMaterial({
     color: 0xffffff,
     roughness: 0.1,
@@ -153,7 +152,7 @@ async function setupScene(): Promise<void> {
     envMapIntensity: 1,
   });
   _floor = new Mesh(floorGeometry, ceramicMaterial);
-  _floor.position.set(0, -0.49, -floorLength / 2);
+  _floor.position.set(0, -0.49, -floorLength / 2 + 2);
   _floor.receiveShadow = true;
   scene.add(_floor);
 
@@ -176,7 +175,7 @@ async function setupScene(): Promise<void> {
     "/models/textures/tiles_0013_height_2k.png"
   );
 
-  const roofRepeatFactor = 3; // Anzahl der Wiederholungen in X- und Y-Richtung
+  const roofRepeatFactor = 3.5; // Anzahl der Wiederholungen in X- und Y-Richtung
   roofBaseColor.wrapS = RepeatWrapping; // Horizontale Wiederholung aktivieren
   roofBaseColor.wrapT = RepeatWrapping; // Vertikale Wiederholung aktivieren
   roofBaseColor.repeat.set(roofRepeatFactor, roofRepeatFactor); // Kachel-Wiederholungen setzen
@@ -197,7 +196,7 @@ async function setupScene(): Promise<void> {
   roofDisplacementMap.wrapT = RepeatWrapping;
   roofDisplacementMap.repeat.set(roofRepeatFactor, roofRepeatFactor);
 
-  const roofGeometry = new BoxGeometry(floorLength, 0.1, floorLength);
+  const roofGeometry = new BoxGeometry(floorLength + 4, 0.1, floorLength + 4);
   const roofMaterial = new MeshStandardMaterial({
     map: roofBaseColor,
     normalMap: roofNormalMap,
@@ -210,12 +209,69 @@ async function setupScene(): Promise<void> {
   });
   roofMaterial.metalness = 0.1; // Maximale metallische Eigenschaft
   roofMaterial.roughness = 0.1; // Mittlere Rauheit
-  roofMaterial.normalScale.set(0.7, 0.7); // Stärke der Normal Map
+  roofMaterial.normalScale.set(0.1, 0.1); // Stärke der Normal Map
   _roof = new Mesh(roofGeometry, roofMaterial);
   _roof.material.transparent = !0;
 
-  _roof.position.set(0, 3.16, -floorLength / 2);
+  _roof.position.set(0, 3.16, -floorLength / 2 + 2);
   scene.add(_roof);
+
+  //walls
+
+  // wall
+  const wallBaseColor = textureLoader.load(
+    "/models/textures/Plaster_02_diffuse.jpg"
+  );
+  const wallNormalMap = textureLoader.load(
+    "/models/textures/Plaster_02_normal.jpg"
+  );
+  const wallRoughnessMap = textureLoader.load(
+    "/models/textures/Plaster_02_glossiness.jpg"
+  );
+  const wallMetallicMap = textureLoader.load(
+    "/models/textures/Plaster_02_bump.jpg"
+  );
+
+  const wallRepeatFactor = 36; // Anzahl der Wiederholungen in X- und Y-Richtung
+  wallBaseColor.wrapS = RepeatWrapping; // Horizontale Wiederholung aktivieren
+  wallBaseColor.wrapT = RepeatWrapping; // Vertikale Wiederholung aktivieren
+  wallBaseColor.repeat.set(wallRepeatFactor, wallRepeatFactor); // Kachel-Wiederholungen setzen
+
+  wallNormalMap.wrapS = RepeatWrapping;
+  wallNormalMap.wrapT = RepeatWrapping;
+  wallNormalMap.repeat.set(wallRepeatFactor, wallRepeatFactor);
+
+  wallRoughnessMap.wrapS = RepeatWrapping;
+  wallRoughnessMap.wrapT = RepeatWrapping;
+  wallRoughnessMap.repeat.set(wallRepeatFactor, wallRepeatFactor);
+
+  wallMetallicMap.wrapS = RepeatWrapping;
+  wallMetallicMap.wrapT = RepeatWrapping;
+  wallMetallicMap.repeat.set(wallRepeatFactor, wallRepeatFactor);
+
+  const wallGeometry = new BoxGeometry(0.1, floorLength + 4, floorLength + 4);
+  const wallMaterial = new MeshStandardMaterial({
+    map: wallBaseColor,
+    normalMap: wallNormalMap,
+    roughnessMap: wallRoughnessMap,
+    metalnessMap: wallMetallicMap,
+    //envMap: shoplight,
+    //envMapIntensity: 0.5,
+  });
+  const wall = new Mesh(wallGeometry, wallMaterial);
+  wall.castShadow = true;
+  wall.receiveShadow = true;
+  const wall2 = wall.clone();
+  const wall3 = wall.clone();
+  scene.add(wall);
+  scene.add(wall2);
+  scene.add(wall3);
+  wall.position.set(-1.91, -floorLength / 2 + 0.4, -floorLength / 2 + 8);
+  wall2.position.set(1.91, -floorLength / 2 + 0.4, -floorLength / 2 + 8);
+  wall3.position.set(1.91, 1.3, -floorLength - 2);
+  wall3.rotation.y = Math.PI / 2;
+
+  //shoppingcart
 
   const metalNormalMap = textureLoader.load("/models/textures/Normals.png");
   const metalRoughnessMap = textureLoader.load(
@@ -275,34 +331,6 @@ async function setupScene(): Promise<void> {
   } catch (error) {
     console.error("Failed to load shopping cashRegister:", error);
   }
-  try {
-    let nudeln = await loadModel("nudeln.glb");
-    if (nudeln) {
-      nudeln.scale.set(0.1, 0.1, 0.1);
-      nudeln.position.set(1.5, 0.8, -16);
-      nudeln.rotation.y = Math.PI * 2;
-      nudeln.traverse((child) => {
-        child.castShadow = true;
-      });
-      scene.add(nudeln);
-    }
-  } catch (error) {
-    console.error("Failed to load shopping cashRegister:", error);
-  }
-  try {
-    let sauce = await loadModel("tomatensauce.glb");
-    if (sauce) {
-      sauce.scale.set(0.1, 0.1, 0.1);
-      sauce.position.set(-1, 0.8, -16);
-      sauce.rotation.y = Math.PI * 2;
-      sauce.traverse((child) => {
-        child.castShadow = true;
-      });
-      scene.add(sauce);
-    }
-  } catch (error) {
-    console.error("Failed to load shopping cashRegister:", error);
-  }
 
   // Shelves and lights
   createShelves(-1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
@@ -311,6 +339,7 @@ async function setupScene(): Promise<void> {
   //Post-Proccessing
   postProcessing(cashRegister);
   //tasksDone = true;
+  console.log("done");
   _renderLoopId = requestAnimationFrame(renderLoop);
 }
 
@@ -362,7 +391,6 @@ onMounted((): void => {
       clickEvent(event, selectMode.value);
       clickCheckout(event, cashRegister);
     });
-    setupScene();
   }
 });
 
@@ -372,13 +400,13 @@ onBeforeUnmount((): void => {
 });
 
 /* --- Exposed Functions --- */
-defineExpose({ leaveSelectMode });
+defineExpose({ leaveSelectMode, setupScene });
 </script>
 
 <template>
   <canvas id="mountId" width="700" height="500" />
-  <div class="fixed top-2 right-2 text-white font-semibold text-4xl">
+  <!-- <div class="fixed top-2 right-2 text-white font-semibold text-4xl">
     <p v-if="!endScreen" v-html="sugarCounter"></p>
-  </div>
+  </div>-->
   <ProductSelectMenu v-if="selectMode" />
 </template>

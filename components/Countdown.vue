@@ -2,58 +2,165 @@
   <div>
     <!-- Fullscreen Start Screen -->
     <div
-      v-if="!started && !gameOver"
-      class="flex items-center justify-center h-screen bg-gray-800 text-white"
+      v-if="!gameOver && !clockStart"
+      class="flex background flex-col items-center justify-center h-screen bg-neutral-950 text-white"
     >
-      <div class="text-center">
-        <h1 class="text-4xl mb-4">Bitter Sweet</h1>
-        <p class="bg-slate-600 p-10 rounded-md mb-4 text-slate-300">Deine Eltern kommen heute Abend zu Besuch. <br> Du möchtest eine gute Pasta für 3 Personen kochen und <br> brauchst noch Getränke und Snacks. <br> Du bist spät dran und hast nur 5 Minuten für den Einkauf.</p>
-        <h1 class="text-4xl font-bold mb-4">{{ formattedTime }}</h1>
-        <button
-          @click="startCountdown"
-          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
+      <div v-if="!started" class="flex flex-col items-center">
+        <div class="text-center mb-16">
+          <div class="relative">
+            <h1 class="text-8xl hdl relative z-10 mb-16 text-orange-800">
+              Bitter-Sweet
+            </h1>
+            <h1
+              class="absolute top-2 right-2 blur-sm whitespace-nowrap text-8xl hdl mb-16 text-black opacity-20"
+            >
+              Bitter-Sweet
+            </h1>
+          </div>
+
+          <p
+            class="bg-black bg-opacity-50 backdrop-blur-sm border-opacity-70 shadow-xl border-white border-[1px] p-10 rounded-2xl mb-8 text-white"
+          >
+            Deine Eltern kommen heute Abend zu Besuch. <br />
+            Du möchtest eine gute Pasta für 3 Personen kochen und <br />
+            brauchst noch Getränke und Snacks. <br />
+            Du bist spät dran und hast nur 5 Minuten für den Einkauf.
+          </p>
+          <h1 class="text-4xl font-bold">{{ formattedTime }}</h1>
+        </div>
+
+        <Button @click="startGame" class="" :text="'Start'" />
+      </div>
+
+      <div
+        v-if="!clockStart && started"
+        class="flex w-full h-full absolute top-0 justify-center backdrop-blur-sm left-0 bg-black bg-opacity-70 flex-col gap-8 items-center"
+      >
+        <div
+          class="bg-orange-300 bg-opacity-100 h-4 backdrop-blur-sm w-80 relative rounded-full overflow-hidden"
         >
-          Start
-        </button>
+          <div
+            :style="{ width: loadingProgress + '%' }"
+            class="h-full bg-orange-500"
+          ></div>
+        </div>
+        <p>{{ loadingMessage }}</p>
       </div>
     </div>
-
     <!-- Fullscreen Game Over Screen -->
     <div
       v-if="gameOver"
-      class="flex items-center justify-center h-screen bg-red-800 text-white"
+      class="flex background items-center justify-center h-screen bg-red-800 text-white"
     >
-      <div class="text-center">
-        <h1 class="text-4xl font-bold mb-4">Game Over</h1>
-        <button 
-          @click="restart" 
-          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
-        >
-          Restart
-        </button>
+      <div class="text-center flex flex-col items-center">
+        <div class="relative">
+          <h1 class="text-8xl hdl relative z-10 mb-16 text-orange-800">
+            Game Over
+          </h1>
+          <h1
+            class="absolute top-2 right-2 blur-sm whitespace-nowrap text-8xl hdl mb-16 text-black opacity-20"
+          >
+            Game Over
+          </h1>
+        </div>
+        <Button @click="restart" :text="'restart'" />
       </div>
     </div>
 
     <!-- Countdown Timer in the Corner -->
     <div
-      v-if="started && !gameOver && !endScreen"
-      class="fixed top-2 min-w-24 right-1/2 translate-x-1/2 bg-gray-900 bg-opacity-50 text-white text-xl text-center font-medium px-4 py-2 rounded-full shadow"
+      v-if="started && !gameOver && !endScreen && clockStart"
+      class="fixed top-5 min-w-24 right-1/2 translate-x-1/2 bg-gray-900 bg-opacity-50 text-white text-xl text-center font-medium px-4 py-2 rounded-full shadow"
     >
       {{ formattedTime }}
+    </div>
+    <div
+      v-if="started && !gameOver && !endScreen && clockStart"
+      class="fixed top-5 min-w-24 right-5 bg-gray-900 bg-opacity-50 text-white text-xl text-center font-medium px-4 py-4 rounded-lg shadow"
+    >
+      <h3 class="hdl mb-3">Shopping List</h3>
+      <div class="flex gap-3 items-center">
+        <div class="checkbox mb-1">
+          <div
+            class="border-white flex items-center justify-center border-2 rounded-md h-5 w-5"
+          >
+            <svg
+              v-if="noodelsCheck"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="4"
+                d="m5 12l5 5L20 7"
+              />
+            </svg>
+          </div>
+        </div>
+        <div>Nudeln</div>
+      </div>
+      <div class="flex gap-3 items-center">
+        <div class="checkbox mb-1">
+          <div
+            class="border-white flex items-center justify-center border-2 rounded-md h-5 w-5"
+          >
+            <svg
+              v-if="sauceCheck"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="4"
+                d="m5 12l5 5L20 7"
+              />
+            </svg>
+          </div>
+        </div>
+        <div>Soße</div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-
+const emit = defineEmits(["startSetup"]);
 const time = ref(300); // 5 minutes in seconds
 const started = ref(false);
+const clockStart = ref(false);
 const gameOver = ref(false);
 let interval = null;
 
-const startCountdown = () => {
+const startGame = () => {
+  emit("startSetup");
   started.value = true;
+  if (loadingProgress.value >= 100 && loadedItems.valu > 10) {
+    startCountdown();
+  }
+};
+
+watch(
+  () => loadingProgress.value,
+  (newValue) => {
+    if (newValue >= 100 && started.value && loadedItems.value > 10) {
+      startCountdown(); // Funktion aufrufen
+    }
+  }
+);
+
+const startCountdown = () => {
+  clockStart.value = true;
   interval = setInterval(() => {
     if (time.value > 0) {
       time.value -= 1;
@@ -65,10 +172,11 @@ const startCountdown = () => {
 };
 
 const restart = () => {
-  time.value = 300; // Reset to 5 minutes
-  started.value = false;
+  time.value = 10; // Reset to 5 minutes
+  //started.value = false;
   gameOver.value = false;
   clearInterval(interval);
+  startCountdown();
 };
 
 const formattedTime = computed(() => {
@@ -85,5 +193,14 @@ defineExpose({ restart });
 <style scoped>
 body {
   @apply bg-gray-900;
+}
+
+.hdl {
+  font-family: "Gardez", "firula";
+}
+
+.background {
+  background-image: url("/models/textures/ceramic_tiles_seashell_basecolor.png");
+  background-size: 40%;
 }
 </style>

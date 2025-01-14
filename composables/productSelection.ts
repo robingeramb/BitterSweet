@@ -67,11 +67,23 @@ export function clickEvent(event) {
     } else {
       if (productView.value === false) {
         productView.value = true;
+
+        while (
+          clickedObject.parent &&
+          clickedObject.parent !== scene &&
+          clickedObject.userData.finalLayer != true
+        ) {
+          clickedObject = clickedObject.parent;
+        }
         selectedProduct = clickedObject.clone();
+        if (selectedProduct.isMesh) {
+          selectedProduct.geometry = clickedObject.geometry.clone();
+          selectedProduct.geometry.center();
+        }
+
         selectedProduct.scale.copy(clickedObject.scale);
         clickedObject.visible = false;
-        selectedProduct.geometry = clickedObject.geometry.clone();
-        selectedProduct.geometry.center();
+
         activateProductView(selectedProduct);
         addRotationControls();
       } else if (productView.value) {
@@ -99,6 +111,7 @@ export function selectedProductToCart() {
 
 export function selectedProductToShelf() {
   removeRotationControls();
+  spotLight.intensity = 0;
   if (selectedProduct) {
     clickedObject.visible = true;
     deleteObjekt(selectedProduct);
@@ -117,8 +130,11 @@ function checkOverProduct(event: MouseEvent) {
   const intersects = raycaster.intersectObjects(shelves);
   if (intersects.length > 0) {
     let hoveredObject = intersects[0].object;
-    if (hoveredObject.userData && hoveredObject.userData.name != undefined) {
-      hoveredProduct.value = hoveredObject.userData.name;
+    if (
+      hoveredObject.userData &&
+      hoveredObject.userData.productName != undefined
+    ) {
+      hoveredProduct.value = hoveredObject.userData.productName;
     } else {
       hoveredProduct.value = undefined;
     }
@@ -133,7 +149,7 @@ function addRotationControls() {
 }
 
 function removeRotationControls() {
-  window.removeEventListener("mousemove", checkOverProduct);
+  //window.removeEventListener("mousemove", checkOverProduct);
   window.removeEventListener("mousedown", onMouseDown);
   window.removeEventListener("mouseup", onMouseUp);
   window.removeEventListener("mousemove", onMouseMove);
@@ -146,14 +162,21 @@ function onMouseDown(event: MouseEvent) {
   raycaster.setFromCamera(mouse, camera);
   let intersects;
   if (productView.value) {
-    intersects = raycaster.intersectObjects([selectedProduct]);
+    if (selectedProduct.isMesh) {
+      intersects = raycaster.intersectObjects([selectedProduct]);
+    } else {
+      intersects = raycaster.intersectObjects(selectedProduct.children);
+    }
   } else {
     intersects = raycaster.intersectObjects(shelves);
   }
-  if (intersects.length > 0) {
+  if (intersects.length > 0 && !productView.value) {
     mouseDownObj = intersects[0].object;
   }
-  if (mouseDownObj == selectedProduct) {
+  if (
+    (mouseDownObj == selectedProduct || intersects.length > 0) &&
+    productView.value
+  ) {
     isDragging = true;
     previousMousePosition = { x: event.clientX, y: event.clientY };
   }
