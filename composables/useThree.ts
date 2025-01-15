@@ -113,7 +113,7 @@ export function useThree() {
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.physicallyCorrectLights = true; // Enable physical lighting
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
+    //renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
     _composer = new EffectComposer(renderer);
 
     return { renderer };

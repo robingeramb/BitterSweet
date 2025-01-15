@@ -81,6 +81,7 @@ export async function createProducts(
         color: color,
       });
       const productGeometry = new THREE.BoxGeometry(l, 0.3, 0.3);
+      //productGeometry.computeVertexNormals();
       productGeometry.translate(l / 2 + dist, 0.15, 0);
       product = new THREE.Mesh(productGeometry, productMaterial);
 
