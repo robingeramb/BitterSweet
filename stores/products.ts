@@ -6,7 +6,7 @@ export const useProductsStore = defineStore({
     products: [
       {
         sugarAmount: 20,
-        productName: "Penne Rigatte Nudeln",
+        productName: "Penne Rigate Nudeln",
         amount: 500,
         model: "Nudeln.glb",
         amountPerPortion: 330,
@@ -14,7 +14,7 @@ export const useProductsStore = defineStore({
       },
       {
         sugarAmount: 20,
-        productName: "Penne Rigatte Nudeln",
+        productName: "Penne Rigate Nudeln",
         amount: 500,
         model: "Nudeln.glb",
         amountPerPortion: 330,
@@ -22,7 +22,7 @@ export const useProductsStore = defineStore({
       },
       {
         sugarAmount: 20,
-        productName: "Penne Rigatte Nudeln",
+        productName: "Penne Rigate Nudeln",
         amount: 500,
         model: "Nudeln.glb",
         amountPerPortion: 330,
@@ -30,7 +30,7 @@ export const useProductsStore = defineStore({
       },
       {
         sugarAmount: 20,
-        productName: "Penne Rigatte Nudeln",
+        productName: "Penne Rigate Nudeln",
         amount: 500,
         model: "Nudeln.glb",
         amountPerPortion: 330,

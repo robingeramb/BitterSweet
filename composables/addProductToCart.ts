@@ -68,7 +68,7 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
 
   // Aufgabe erfüllt
 
-  const targetNames = ["Penne Rigatte Nudeln", "Tomatensauce"];
+  const targetNames = ["Penne Rigate Nudeln", "Tomatensauce"];
 
   const nameCount = productsInCart.children.reduce((count, child) => {
     if (targetNames.includes(child.userData.productName)) {

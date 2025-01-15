@@ -200,7 +200,7 @@ body {
 }
 
 .background {
-  background-image: url("/models/textures/ceramic_tiles_seashell_basecolor.png");
+  background-image: url("/models/textures/ceramic_tiles/baseColor.webp");
   background-size: 40%;
 }
 </style>

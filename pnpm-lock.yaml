@@ -32,6 +32,9 @@ importers:
       postprocessing:
         specifier: ^6.36.6
         version: 6.36.6(three@0.172.0)
+      spectorjs:
+        specifier: ^0.9.30
+        version: 0.9.30
       three:
         specifier: ^0.172.0
         version: 0.172.0
@@ -1102,6 +1105,10 @@ packages:
     resolution: {integrity: sha512-D6qjsXGcvhTjv0kI4fU8tUuBDF/Ueee4SVX79VfNDXZa64TfCW1Slkb6Z7O1p7vflqZjcmOVdZlqf8gvJxc6og==}
     cpu: [x64]
     os: [win32]
+
+  '@shaderfrog/glsl-parser@2.1.5':
+    resolution: {integrity: sha512-fw7U8Y7BBV9NZVLs7lyM8lpQ9YUK7XBNJjN4HhkY3nqkKpSiIQ62PVtPYtW7uZME5072QXQNQBhHJzG3t+NH0w==}
+    engines: {node: '>=16'}
 
   '@sindresorhus/merge-streams@2.3.0':
     resolution: {integrity: sha512-LtoMMhxAlorcGhmFYI+LhPgbPZCkgP6ra1YL604EeF6U98pLlQ3iWIGMdWSC+vWmPBWBNgmDBAhnAobLROJmwg==}
@@ -4008,6 +4015,9 @@ packages:
     resolution: {integrity: sha512-1POYv7uv2gXoyGFpBCmpDVSNV74IfsWlDW216UPjbWufNf+bSU6GdbDsxdcxtfwb4xlI3yxzOTKClUosxARYrQ==}
     engines: {node: '>=0.10.0'}
 
+  spectorjs@0.9.30:
+    resolution: {integrity: sha512-I9/VI3gfO3UiBCUXj20lQjP3fbezP2y03Virnv3jcMpIiF+/NOyWDrBQ+U8vf29IXHPscxOXzzmZDCkETznsMg==}
+
   standard-as-callback@2.1.0:
     resolution: {integrity: sha512-qoRRSyROncaz1z0mvYqIE4lCd9p2R90i6GxW3uZv5ucSu8tU7B5HXUP1gG8pVZsYNVaXjk8ClXHPttLyxAL48A==}
 
@@ -5801,6 +5811,8 @@ snapshots:
 
   '@rollup/rollup-win32-x64-msvc@4.30.1':
     optional: true
+
+  '@shaderfrog/glsl-parser@2.1.5': {}
 
   '@sindresorhus/merge-streams@2.3.0': {}
 
@@ -9902,6 +9914,10 @@ snapshots:
   source-map@0.7.4: {}
 
   speakingurl@14.0.1: {}
+
+  spectorjs@0.9.30:
+    dependencies:
+      '@shaderfrog/glsl-parser': 2.1.5
 
   standard-as-callback@2.1.0: {}
 

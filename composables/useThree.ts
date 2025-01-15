@@ -26,9 +26,13 @@ export const world = new CANNON.World();
 import { disposeObject } from "@/utils/disposeUtils";
 import { ThreeMFLoader } from "three/examples/jsm/Addons.js";
 
+import { Spector } from "spectorjs";
+
+// Spector initialisieren
+const spector = new Spector();
 export const scene = new Scene();
 export let _composer: EffectComposer;
-export const camera = new PerspectiveCamera(50, 200 / 200, 0.1, 1000);
+export const camera = new PerspectiveCamera(50, 200 / 200, 0.1, 30);
 export const productSelection = new Group();
 export const physicObjects = new Map();
 export let currX = ref();
@@ -70,6 +74,7 @@ export const textureLoader = new TextureLoader(loadingManager);
 
 export function useThree() {
   function initThree(canvasMountId: string) {
+    spector.displayUI();
     const canvas = document.getElementById(canvasMountId)! as HTMLCanvasElement;
     const ambientLight = new AmbientLight(0xffffff, 0.2);
 
