@@ -20,8 +20,10 @@ export function postProcessing(cashRegister) {
   outlinePass.selectedObjects = [cashRegister];
   outlinePass.visibleEdgeColor.set(0x65ed55);
   outlinePass.hiddenEdgeColor.set(0x000000);
-  outlinePass.edgeStrength = 5.0;
-  outlinePass.edgeThickness = 2;
+  outlinePass.edgeStrength = 2.0;
+  outlinePass.edgeThickness = 0.5;
+  outlinePass.edgeGlow = 0.5;
+  outlinePass.pulsePeriod = 4;
 
   _composer.addPass(outlinePass);
   // RenderPass für die normale Szene
