@@ -28,8 +28,6 @@ export function useMoveCamera() {
         camera.position.x = -1.5 + v;
       }
     }
-
-    //_cubeCamera.position.z = _camera.position.z;
   }
 
   function moveCameraXY(x: number, y: number) {
