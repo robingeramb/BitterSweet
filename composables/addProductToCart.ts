@@ -23,6 +23,8 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
     // Maße extrahieren
     dimensions = new THREE.Vector3();
     boundingBox.getSize(dimensions); // Gibt die Breite, Höhe und Tiefe zurüc
+    console.log("dimensions");
+    console.log(dimensions);
     boxShape = new CANNON.Box(
       new CANNON.Vec3(
         (dimensions.x * scaleAmount) / 2,
@@ -32,7 +34,6 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
     ); // Rechteckige Box (2x1x0.5)
   }
 
-  console.log(dimensions);
   addedProduct.position.set(0, 2, 0);
 
   // Erstelle ein physikalisches Objekt (Body)
@@ -58,6 +59,7 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   physicObjects.set(addedProduct, boxBody);
   addedProduct.translateX(0);
   addedProduct.translateY(0);
+
   addedProduct.translateZ(0);
 
   sugarCounter.value += clickedObject.userData.sugarAmount;
@@ -73,7 +75,7 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   const nameCount = productsInCart.children.reduce((count, child) => {
     if (targetNames.includes(child.userData.productName)) {
       count++;
-      console.log(child.userData.category);
+
       if (child.userData.category.toString() == "noodles") {
         noodelsCheck.value = true;
       } else {

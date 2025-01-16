@@ -102,6 +102,7 @@ export function productHover() {
 export function selectedProductToCart() {
   removeRotationControls();
   if (selectedProduct) {
+    deleteObjekt(clickedObject);
     useAddProductToCart(selectedProduct, scaleAmount);
     setTimeout(() => {
       productView.value = false;

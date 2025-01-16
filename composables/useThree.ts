@@ -31,6 +31,7 @@ import { Spector } from "spectorjs";
 // Spector initialisieren
 const spector = new Spector();
 export const scene = new Scene();
+export const shouldUpdatePhysics = ref(false);
 export let _composer: EffectComposer;
 export const camera = new PerspectiveCamera(50, 200 / 200, 0.1, 30);
 export const productSelection = new Group();

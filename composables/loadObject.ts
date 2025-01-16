@@ -8,7 +8,6 @@ export function loadModel(name: string): Promise<any> {
     let newModel = models[name].clone();
     newModel.position.copy(models[name].position.clone());
     newModel.scale.set(1, 1, 1);
-    console.log(newModel.scale);
     return Promise.resolve(newModel);
   }
 

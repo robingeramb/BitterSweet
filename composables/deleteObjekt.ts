@@ -11,5 +11,5 @@ export const deleteObjekt = (obj) => {
   if (obj.children.length > 0) {
     obj.children.forEach((child) => disposeObject(child));
   }
-  scene.remove(obj);
+  obj.parent.remove(obj);
 };

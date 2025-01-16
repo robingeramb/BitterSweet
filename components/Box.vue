@@ -2,32 +2,29 @@
 /* --- Imports --- */
 import { useThree, camera, scene } from "@/composables/useThree";
 import { useMoveCamera } from "@/composables/moveCamera";
-import { BoxGeometry, Mesh, WebGLRenderer, WebGLCubeRenderTarget } from "three";
+import { BoxGeometry, Mesh, WebGLRenderer } from "three";
 
 /* --- Props --- */
 interface Props {
   mousePos: { x: number; y: number };
   scrollVal: number;
 }
-
 const props = defineProps<Props>();
 
 /* --- Reactive Variables and References --- */
 let shoppingCart: Mesh | null = null;
 let cashRegister: Mesh;
-let _cubeRenderTarget: WebGLCubeRenderTarget;
 let _renderer: WebGLRenderer;
-
 let _renderLoopId: number;
 let _floor: Mesh;
 let _roof: Mesh;
 
 /* --- Constants --- */
-const floorLength: number = 20;
-const shelfLength: number = 0.5;
-const shelfHeight: number = 2;
-const shelfWidth: number = 2.5;
-const dist: number = 2.2;
+const floorLength = 20;
+const shelfLength = 0.5;
+const shelfHeight = 2;
+const shelfWidth = 2.5;
+const dist = 2.2;
 
 /* --- Composables --- */
 const { initThree, cleanUpThree } = useThree();
@@ -38,18 +35,13 @@ const canvas = computed(
 );
 
 /* --- Watches --- */
-watch(
-  () => props.scrollVal,
-  (newValue: number) => moveCameraZ(newValue)
-);
-
+watch(() => props.scrollVal, moveCameraZ);
 watch(
   () => [props.mousePos.x, props.mousePos.y],
-  ([newX, newY]: [number, number]) => moveCameraXY(newX, newY)
+  ([newX, newY]) => moveCameraXY(newX, newY)
 );
 
 /* --- Functions --- */
-
 async function setupScene(): Promise<void> {
   const { renderer } = initThree("mountId");
   _renderer = renderer;
@@ -60,12 +52,22 @@ async function setupScene(): Promise<void> {
   const lights = await createLights(floorLength, shelfWidth, shelfLength, dist);
   scene.add(lights);
 
-  // Floor
-
   const shoplight = await loadEXR("phone_shop_4k.exr");
 
-  // PBR-Material erstellen
+  setupFloor();
+  setupRoof();
+  setupWalls();
+  await setupShoppingCart(shoplight);
+  await setupCashRegister();
 
+  createShelves(-1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
+  createShelves(1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
+
+  postProcessing(cashRegister);
+  _renderLoopId = requestAnimationFrame(renderLoop);
+}
+
+function setupFloor(): void {
   const ceramicMaterial = createTexture(
     "ceramic_tiles",
     16,
@@ -85,10 +87,9 @@ async function setupScene(): Promise<void> {
   _floor.position.set(0, -0.49, -floorLength / 2 + 2);
   _floor.receiveShadow = true;
   scene.add(_floor);
+}
 
-  // Roof
-  const roofGeometry = new BoxGeometry(floorLength + 4, 0.1, floorLength + 4);
-
+function setupRoof(): void {
   const roofMaterial = createTexture(
     "ceiling_tiles",
     3.5,
@@ -102,19 +103,15 @@ async function setupScene(): Promise<void> {
     0.1,
     0.1
   );
+  const roofGeometry = new BoxGeometry(floorLength + 4, 0.1, floorLength + 4);
 
   _roof = new Mesh(roofGeometry, roofMaterial);
-  _roof.material.transparent = !0;
-
   _roof.position.set(0, 3.16, -floorLength / 2 + 2);
+  _roof.material.transparent = true;
   scene.add(_roof);
+}
 
-  //walls
-
-  // wall
-
-  const wallGeometry = new BoxGeometry(0.1, floorLength + 4, floorLength + 4);
-
+function setupWalls(): void {
   const wallMaterial = createTexture(
     "wallpaper_rough",
     36,
@@ -125,22 +122,24 @@ async function setupScene(): Promise<void> {
     false,
     0.1
   );
+  const wallGeometry = new BoxGeometry(0.1, floorLength + 4, floorLength + 4);
 
   const wall = new Mesh(wallGeometry, wallMaterial);
   wall.castShadow = true;
   wall.receiveShadow = true;
+
   const wall2 = wall.clone();
   const wall3 = wall.clone();
-  scene.add(wall);
-  scene.add(wall2);
-  scene.add(wall3);
+
   wall.position.set(-1.91, -floorLength / 2 + 0.4, -floorLength / 2 + 8);
   wall2.position.set(1.91, -floorLength / 2 + 0.4, -floorLength / 2 + 8);
   wall3.position.set(1.91, 1.3, -floorLength - 2);
   wall3.rotation.y = Math.PI / 2;
 
-  //shoppingcart
+  scene.add(wall, wall2, wall3);
+}
 
+async function setupShoppingCart(shoplight: any): Promise<void> {
   const metal = createTexture(
     "shoppingCart",
     1,
@@ -154,16 +153,13 @@ async function setupScene(): Promise<void> {
     1,
     0.1
   );
-
   metal.envMap = shoplight;
   metal.envMapIntensity = 0.1;
-  // Shopping cart
 
   shoppingCart = await loadModel("shoppingcart.glb");
   if (shoppingCart) {
     shoppingCart.scale.set(0.01, 0.01, 0.01);
     shoppingCart.position.set(0, 0.95, -1);
-    //shoppingCart.rotation.y = Math.PI / 2;
     shoppingCart.traverse((child) => {
       child.castShadow = true;
       if (child.material) {
@@ -174,33 +170,19 @@ async function setupScene(): Promise<void> {
 
     generateShoppingCartBorderBox();
   }
+}
 
-  // cashRegister
-
-  try {
-    cashRegister = await loadModel("kasse.glb");
-    if (cashRegister) {
-      cashRegister.scale.set(0.2, 0.2, 0.2);
-      cashRegister.position.set(0.8, 0.07, -16);
-      cashRegister.rotation.y = Math.PI / 2;
-      cashRegister.traverse((child) => {
-        child.castShadow = true;
-      });
-      scene.add(cashRegister);
-    }
-  } catch (error) {
-    console.error("Failed to load shopping cashRegister:", error);
+async function setupCashRegister(): Promise<void> {
+  cashRegister = await loadModel("kasse.glb");
+  if (cashRegister) {
+    cashRegister.scale.set(0.2, 0.2, 0.2);
+    cashRegister.position.set(0.8, 0.07, -16);
+    cashRegister.rotation.y = Math.PI / 2;
+    cashRegister.traverse((child) => {
+      child.castShadow = true;
+    });
+    scene.add(cashRegister);
   }
-
-  // Shelves and lights
-  createShelves(-1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
-  createShelves(1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
-
-  //Post-Proccessing
-  postProcessing(cashRegister);
-  //tasksDone = true;
-  console.log("done");
-  _renderLoopId = requestAnimationFrame(renderLoop);
 }
 
 function renderLoop(): void {
@@ -241,18 +223,18 @@ function leaveSelectMode(): void {
 }
 
 /* --- Lifecycle Hooks --- */
-onMounted((): void => {
+onMounted(() => {
   if (canvas.value) {
     canvas.value.width = window.innerWidth;
     canvas.value.height = window.innerHeight;
-    window.addEventListener("click", (event: MouseEvent) => {
+    window.addEventListener("click", (event) => {
       clickEvent(event, selectMode.value);
       clickCheckout(event, cashRegister);
     });
   }
 });
 
-onBeforeUnmount((): void => {
+onBeforeUnmount(() => {
   cancelAnimationFrame(_renderLoopId);
   cleanUpThree(scene, _renderer);
 });
@@ -263,8 +245,5 @@ defineExpose({ leaveSelectMode, setupScene });
 
 <template>
   <canvas id="mountId" width="700" height="500" />
-  <!-- <div class="fixed top-2 right-2 text-white font-semibold text-4xl">
-    <p v-if="!endScreen" v-html="sugarCounter"></p>
-  </div>-->
   <ProductSelectMenu v-if="selectMode" />
 </template>

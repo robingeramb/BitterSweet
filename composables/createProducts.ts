@@ -14,7 +14,7 @@ export async function createProducts(
 
   for (let index = 0; index < productList.length; index++) {
     const element = productList[index];
-
+    let dimensions;
     let product: THREE.Object3D;
     if (element.model) {
       // Lade das Modell asynchron
@@ -28,7 +28,7 @@ export async function createProducts(
           // Berechne die BoundingBox und passe die Skalierung an
           product = mesh.clone();
           product.geometry.computeBoundingBox();
-          const dimensions = product.geometry.boundingBox!.getSize(
+          dimensions = product.geometry.boundingBox!.getSize(
             new THREE.Vector3()
           );
           product.castShadow = true;
@@ -45,7 +45,7 @@ export async function createProducts(
         const boundingBox = new THREE.Box3().setFromObject(product);
 
         // Maße extrahieren
-        const dimensions = new THREE.Vector3();
+        dimensions = new THREE.Vector3();
         boundingBox.getSize(dimensions); // Gibt die Breite, Höhe und Tiefe zurück
 
         product.castShadow = true;
@@ -64,11 +64,7 @@ export async function createProducts(
           child.receiveShadow = true;
         });
         // Übersetze das gesamte Produkt (nicht nur die Geometrie)
-        product.position.set(
-          index * (l + dist) + l / 2 + dist,
-          scale / 2 - 0.025,
-          0
-        );
+        product.position.set(index * (l + dist) + l / 2 + dist, scale / 2, 0);
 
         if (element.rotation) {
           product.rotation.y = element.rotation;
@@ -94,7 +90,7 @@ export async function createProducts(
     // Setze die Position und füge Daten hinzu
     product.userData = element;
     product.userData.finalLayer = true;
-
+    product.userData.dimensions = dimensions;
     // Füge das Produkt der Gruppe hinzu
     products.add(product);
   }
