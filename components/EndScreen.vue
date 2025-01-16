@@ -9,12 +9,12 @@
           <ul class="px-10 py-10 bg-white rounded-md mb-8 mx-5">
             <p class="text-2xl font-semibold text-slate-950">Your receipt</p>
             <div class="border-t border-dashed border-gray-500 mb-4 mt-2 -mx-10"></div>
-            <li class="mb-4" v-for="(child, index) in productsInCart.children" :key="index">
+            <li class="mb-4" v-for="(child, index) in productsInCart" :key="index">
               <p class="text-slate-800 text-xs">
-                {{ child.userData.amount }}g
-                {{ child.userData.productName || "Unbenannt" }}:
+                {{ child.amount }}g
+                {{ child.productName || "Unbenannt" }}:
               </p>
-              <p class="text-red-900">{{ child.userData.sugarAmount }}g sugar / ≈ {{ Math.round(child.userData.sugarAmount / 3) }}g per person</p>
+              <p class="text-red-900">{{ child.sugarAmount }}g sugar / ≈ {{ Math.round(child.sugarAmount / 3) }}g per person</p>
             </li>
             <div class="border-t border-dashed border-gray-500 mb-4 mt-2 -mx-10"></div>
             <p class="text-5xl font-bold text-orange-800">
@@ -38,7 +38,7 @@
             </li>
             <div class="border-t border-dashed border-gray-500 mb-4 mt-2 -mx-10"></div>
             <p class="text-xs text-slate-300 mb-2">Based on that:</p>
-            <p class="text-red-500 font-semibold text-xl"> {{ findSugarRange() }} </p>
+            <p class="text-red-500 font-semibold text-xl" v-html="formattedText"></p>
 
          </ul>
         </div>
@@ -50,19 +50,18 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import * as THREE from "three";
 import { useSugarEffects } from "~/stores/effects";
 
 const effectsStore = useSugarEffects();
 const effectList = effectsStore.effects;
-const productCount = productsInCart.children.length;
+const productCount = productsInCart.length;
 let showTitel = true;
 let showMainTitel = true;
-
+let formattedText: string;
 
 //Checken ob Zuckerergebnis in einem Bereich liegt
-
 function findSugarRange() {
 
   let found = false;
@@ -91,8 +90,46 @@ function findSugarRange() {
   if (!found) {
       console.log(`sugarPerPerson (${sugarPerPerson}) liegt in keinem definierten Bereich.`);
     } else {
-      return current.description;
+      addParagraphsToString(current.description, 20);
   }
+}
+
+function addParagraphsToString(text: string, maxLength: number) {
+  let result = '';
+  let currentLength = 0;
+  let currentWord = '';
+  
+  // Wir durchlaufen den Text Zeichen für Zeichen
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    
+    // Wenn wir ein Leerzeichen oder ein Satzzeichen finden, haben wir ein ganzes Wort
+    if (char === ' ' || char === '.' || char === ',' || char === '!' || char === '?') {
+      currentWord += char; // Füge auch das Leerzeichen oder Satzzeichen hinzu
+      result += currentWord; // Das Wort in den Ergebnis-String einfügen
+      currentLength += currentWord.length; // Die Länge des aktuellen Wortes addieren
+
+      // Wenn wir die maximale Länge erreicht haben, fügen wir einen Absatz ein
+      if (currentLength >= maxLength) {
+        result += '\n\n'; // Doppelter Zeilenumbruch für Absatz
+        currentLength = 0; // Zurücksetzen der aktuellen Länge
+      }
+
+      // Das Wort zurücksetzen, um das nächste zu speichern
+      currentWord = '';
+    } else {
+      // Wenn es kein Leerzeichen oder Satzzeichen ist, fügen wir es zum aktuellen Wort hinzu
+      currentWord += char;
+    }
+  }
+
+  // Am Ende sicherstellen, dass das letzte Wort hinzugefügt wird
+  if (currentWord) {
+    result += currentWord;
+  }
+
+  formattedText = result;
+  console.log(formattedText);
 }
 
 //Check how many items in cart and response dynamic layout

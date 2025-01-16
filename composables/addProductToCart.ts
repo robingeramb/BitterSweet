@@ -62,26 +62,27 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
 
   sugarCounter.value += clickedObject.userData.sugarAmount;
   productSelection.add(addedProduct);
+  productsInCart.push(clickedObject.userData)
+  console.log(productsInCart)
   deleteObjekt(clickedObject);
-  productsInCart.add(clickedObject);
-  productsInCart.children.forEach((child) => {});
 
   // Aufgabe erfüllt
 
   const targetNames = ["Penne Rigate Nudeln", "Tomatensauce"];
 
-  const nameCount = productsInCart.children.reduce((count, child) => {
-    if (targetNames.includes(child.userData.productName)) {
-      count++;
+  productsInCart.forEach(element => {
+    if (targetNames.includes(element.productName)) {
+      
 
-      if (child.userData.category.toString() == "noodles") {
+      if (element.category == "noodles") {
         noodelsCheck.value = true;
       } else {
         sauceCheck.value = true;
       }
     }
-    return count;
-  }, 0);
+  });
+
+ 
 
   if (noodelsCheck.value && sauceCheck.value) {
     taskDone.value = true;
