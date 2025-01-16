@@ -136,7 +136,7 @@
 <script setup>
 import { ref } from "vue";
 const emit = defineEmits(["startSetup"]);
-const time = ref(300); // 5 minutes in seconds
+const time = ref(600); // 5 minutes in seconds
 const started = ref(false);
 const clockStart = ref(false);
 const gameOver = ref(false);
@@ -145,7 +145,11 @@ let interval = null;
 const startGame = () => {
   emit("startSetup");
   started.value = true;
-  if (loadingProgress.value >= 100 && loadedItems.valu > 10) {
+  if (
+    loadingProgress.value >= 100 &&
+    loadedItems.value > 20 &&
+    clockStart.value == false
+  ) {
     startCountdown();
   }
 };
@@ -153,7 +157,12 @@ const startGame = () => {
 watch(
   () => loadingProgress.value,
   (newValue) => {
-    if (newValue >= 100 && started.value && loadedItems.value > 10) {
+    if (
+      newValue >= 100 &&
+      started.value &&
+      loadedItems.value > 20 &&
+      clockStart.value == false
+    ) {
       startCountdown(); // Funktion aufrufen
     }
   }

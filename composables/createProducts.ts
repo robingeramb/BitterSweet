@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { useProductsStore } from "~/stores/products";
 
 export async function createProducts(
   shelfWidth: number,
@@ -7,13 +8,14 @@ export async function createProducts(
 ): Promise<THREE.Group> {
   const dist = 0.1;
   const products = new THREE.Group();
-
+  const myStore = useProductsStore();
+  const productOrigin = myStore.products;
   // Berechnung der Breite eines Produkts
   const l =
     (shelfLength - dist * (productList.length + 1)) / productList.length;
 
   for (let index = 0; index < productList.length; index++) {
-    const element = productList[index];
+    const element = productOrigin[productList[index]];
     let dimensions;
     let product: THREE.Object3D;
     if (element.model) {
@@ -37,7 +39,7 @@ export async function createProducts(
           product.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
           // Übersetze das gesamte Produkt (nicht nur die Geometrie)
-          product.position.set(index * (l + dist) + l / 2 + dist, 0, 0);
+          product.position.set(index * (l + dist) + l / 2 + dist, 0, 0.1);
           product.rotation.y = Math.PI / 2;
         }
       } else {
@@ -64,7 +66,7 @@ export async function createProducts(
           child.receiveShadow = true;
         });
         // Übersetze das gesamte Produkt (nicht nur die Geometrie)
-        product.position.set(index * (l + dist) + l / 2 + dist, scale / 2, 0);
+        product.position.set(index * (l + dist) + l / 2 + dist, scale / 2, 0.1);
 
         if (element.rotation) {
           product.rotation.y = element.rotation;

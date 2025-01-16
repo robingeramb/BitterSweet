@@ -7,6 +7,7 @@ export function loadModel(name: string): Promise<any> {
   if (models[name]) {
     let newModel = models[name].clone();
     newModel.position.copy(models[name].position.clone());
+    newModel.rotation.copy(models[name].rotation.clone());
     newModel.scale.set(1, 1, 1);
     return Promise.resolve(newModel);
   }

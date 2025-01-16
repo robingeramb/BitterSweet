@@ -23,8 +23,6 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
     // Maße extrahieren
     dimensions = new THREE.Vector3();
     boundingBox.getSize(dimensions); // Gibt die Breite, Höhe und Tiefe zurüc
-    console.log("dimensions");
-    console.log(dimensions);
     boxShape = new CANNON.Box(
       new CANNON.Vec3(
         (dimensions.x * scaleAmount) / 2,

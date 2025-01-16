@@ -24,7 +24,7 @@ const floorLength = 20;
 const shelfLength = 0.5;
 const shelfHeight = 2;
 const shelfWidth = 2.5;
-const dist = 2.2;
+const dist = 0.12;
 
 /* --- Composables --- */
 const { initThree, cleanUpThree } = useThree();
@@ -60,8 +60,15 @@ async function setupScene(): Promise<void> {
   await setupShoppingCart(shoplight);
   await setupCashRegister();
 
-  createShelves(-1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
-  createShelves(1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
+  createShelves(
+    { x1: -1.6, x2: 1.6 },
+    floorLength,
+    shelfWidth,
+    shelfLength,
+    dist,
+    shelfHeight
+  );
+  //createShelves(1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
 
   postProcessing(cashRegister);
   _renderLoopId = requestAnimationFrame(renderLoop);

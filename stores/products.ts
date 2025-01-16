@@ -3,8 +3,8 @@ import { defineStore } from "pinia";
 export const useProductsStore = defineStore({
   id: "productsStore",
   state: () => ({
-    products: [
-      {
+    products: {
+      penneRigateNoodle: {
         sugarAmount: 20,
         productName: "Penne Rigate Nudeln",
         amount: 500,
@@ -12,35 +12,20 @@ export const useProductsStore = defineStore({
         amountPerPortion: 330,
         category: "noodles",
       },
-      {
-        sugarAmount: 20,
-        productName: "Penne Rigate Nudeln",
-        amount: 500,
-        model: "Nudeln.glb",
-        amountPerPortion: 330,
-        category: "noodles",
-      },
-      {
-        sugarAmount: 20,
-        productName: "Penne Rigate Nudeln",
-        amount: 500,
-        model: "Nudeln.glb",
-        amountPerPortion: 330,
-        category: "noodles",
-      },
-      {
+      monster: {
         sugarAmount: 20,
         productName: "Monster energy",
         amount: 500,
         scale: 0.3,
+        rotation: -Math.PI,
         model: "monster.glb",
         meshMode: false,
         amountPerPortion: 330,
         category: "noodles",
       },
-      {
+      coke: {
         sugarAmount: 7,
-        productName: "Coce",
+        productName: "Coke",
         scale: 0.4,
         rotation: 0,
         model: "colaglassCenter.glb",
@@ -49,7 +34,7 @@ export const useProductsStore = defineStore({
         amountPerPortion: 150,
         category: "fruit",
       },
-      {
+      tomatosauce: {
         sugarAmount: 7,
         productName: "Tomatensauce",
         scale: 0.2,
@@ -60,7 +45,7 @@ export const useProductsStore = defineStore({
         amountPerPortion: 150,
         category: "fruit",
       },
-      {
+      chips: {
         sugarAmount: 2,
         productName: "Chips",
         scale: 0.4,
@@ -69,28 +54,225 @@ export const useProductsStore = defineStore({
         amount: 500,
         amountPerPortion: 50,
         category: "bakery",
-      } /*
+      },
+    },
+    shelves: [
       {
-        sugarAmount: 15,
-        productName: "Granola Bar",
-        amount: 40,
-        amountPerPortion: 40,
-        category: "snack",
+        name: "Noodles",
+        boards: [
+          {
+            repeat: 4,
+            products: [
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+            ],
+          },
+        ],
       },
       {
-        sugarAmount: 8,
-        productName: "Orange Juice",
-        amount: 250,
-        amountPerPortion: 250,
-        category: "beverage",
+        name: "Drinks",
+        boards: [
+          {
+            repeat: 2,
+            products: [
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+            ],
+          },
+          {
+            repeat: 2,
+            products: [
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+            ],
+          },
+        ],
       },
       {
-        sugarAmount: 6,
-        productName: "Cereal",
-        amount: 300,
-        amountPerPortion: 30,
-        category: "breakfast",
-      },*/,
+        name: "Noodles",
+        boards: [
+          {
+            repeat: 4,
+            products: [
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+            ],
+          },
+        ],
+      },
+      {
+        name: "Drinks",
+        boards: [
+          {
+            repeat: 2,
+            products: [
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+            ],
+          },
+          {
+            repeat: 2,
+            products: [
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+            ],
+          },
+        ],
+      },
+      {
+        name: "Noodles",
+        boards: [
+          {
+            repeat: 4,
+            products: [
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+              "penneRigateNoodle",
+            ],
+          },
+        ],
+      },
+      {
+        name: "Drinks",
+        boards: [
+          {
+            repeat: 2,
+            products: [
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+              "monster",
+            ],
+          },
+          {
+            repeat: 2,
+            products: [
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+              "coke",
+            ],
+          },
+        ],
+      },
+      {
+        name: "Sauces",
+        boards: [
+          {
+            repeat: 4,
+            products: [
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+            ],
+          },
+        ],
+      },
+
+      {
+        name: "Snack",
+        boards: [
+          {
+            repeat: 4,
+            products: [
+              "chips",
+              "chips",
+              "chips",
+              "chips",
+              "chips",
+              "chips",
+              "chips",
+            ],
+          },
+        ],
+      },
+      {
+        name: "Sauces",
+        boards: [
+          {
+            repeat: 4,
+            products: [
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+              "tomatosauce",
+            ],
+          },
+        ],
+      },
+
+      {
+        name: "Snack",
+        boards: [
+          {
+            repeat: 4,
+            products: [
+              "chips",
+              "chips",
+              "chips",
+              "chips",
+              "chips",
+              "chips",
+              "chips",
+            ],
+          },
+        ],
+      },
     ],
   }),
   getters: {

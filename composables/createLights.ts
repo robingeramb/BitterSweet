@@ -27,12 +27,12 @@ export async function createLights(
     const light = lightModel.clone();
     const lightGroup = new THREE.Group();
     const rectAreaLight = new THREE.RectAreaLight(0xffffff, 1, 0.7, 2);
-    lightGroup.position.set(0, 3, -1 * (index * ((shelfLength + dist) * 2)));
+    lightGroup.position.set(0, 3, -1 * (index * ((shelfWidth + dist) * 2)));
     rectAreaLight.rotateX(-Math.PI / 2); // Ensure light points at the center
 
     const rectLightHelper = new RectAreaLightHelper(rectAreaLight); // Helper to visualize the light
     rectAreaLight.add(rectLightHelper);
-    const spotLight = new THREE.PointLight(0xfcfbed, 26, 20);
+    const spotLight = new THREE.PointLight(0xfcfbed, 16, 20);
     spotLight.position.set(0, 0.049, 0);
 
     spotLight.castShadow = true;

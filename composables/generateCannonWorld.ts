@@ -69,7 +69,6 @@ export const generateShoppingCartBorderBox = () => {
   wallFrontBodyCA.addShape(wallFrontCA);
   const quaternion = new Quaternion();
   quaternion.setFromEuler(wallFrontMesh.rotation); // Rotation des Meshes als Quaternion
-  console.log(quaternion);
   wallFrontBodyCA.quaternion.set(
     quaternion.x,
     quaternion.y,

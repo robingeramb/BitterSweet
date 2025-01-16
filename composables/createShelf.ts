@@ -1,11 +1,11 @@
 import * as THREE from "three";
-import { useProductsStore } from "~/stores/products";
 
 export async function createShelve(
   height: number,
   length: number,
   width: number,
-  material: THREE.MeshStandardMaterial
+  material: THREE.MeshStandardMaterial,
+  props: { name: string; boards: { repeat: number; products: string[] }[] }
 ) {
   const shelf = new THREE.Group();
   //const material = new THREE.MeshStandardMaterial({ color: 0x454545 }); // Regal-Material (Holzfarbe)
@@ -16,9 +16,15 @@ export async function createShelve(
   bottomMesh.castShadow = true;
   bottomMesh.receiveShadow = true;
   bottomMesh.position.set(0, -height / 2 + height * 0.025, 0);
-  const myStore = useProductsStore();
-  const productList = myStore.products;
-  for (let i = 0; i < 4; i++) {
+
+  let shelfAmount = [];
+  props.boards.forEach((element) => {
+    for (let i = 0; i < element.repeat; i++) {
+      shelfAmount.push(element);
+    }
+  });
+
+  for (let i = 0; i < shelfAmount.length; i++) {
     const productBoard = new THREE.Group();
     const geometry = new THREE.BoxGeometry(
       length,
@@ -30,7 +36,11 @@ export async function createShelve(
     board.castShadow = true;
     board.receiveShadow = true;
 
-    const products = await createProducts(width, length, productList);
+    const products = await createProducts(
+      width,
+      length,
+      shelfAmount[i].products
+    );
     products.translateY(height * 0.0125);
     products.translateX(-0.5 * length);
     productBoard.add(products);

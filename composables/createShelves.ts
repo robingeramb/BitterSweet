@@ -6,8 +6,10 @@ import {
   TextureLoader,
 } from "three";
 
+import { useProductsStore } from "~/stores/products";
+
 export async function createShelves(
-  x: number,
+  pos: object,
   floorLength: number,
   shelfWidth: number,
   shelfLength: number,
@@ -15,22 +17,38 @@ export async function createShelves(
   shelfHeight: number
 ) {
   // shelf
-
-  const shelfMaterial = createTexture("shelf_metal", 4, true, true, true, true);
-
-  for (let index = 0; index < floorLength / (shelfWidth + dist); index++) {
+  const myStore = useProductsStore();
+  const shelfMaterial = createTexture(
+    "shelf_metal",
+    4,
+    true,
+    true,
+    true,
+    true,
+    false,
+    1
+  );
+  let currPos = 0;
+  let posCounter = -2;
+  for (let index = 0; index < myStore.shelves.length; index++) {
+    if (currPos == pos.x2) {
+      currPos = pos.x1;
+    } else {
+      currPos = pos.x2;
+      posCounter++;
+    }
     const shelf = await createShelve(
       shelfHeight,
       shelfWidth,
       shelfLength,
-      shelfMaterial
+      shelfMaterial,
+      myStore.shelves[index]
     );
-
     // Position des Regals berechnen
-    shelf.position.x = x; // Regale entlang der X-Achse platzieren
+    shelf.position.x = currPos; // Regale entlang der X-Achse platzieren
     shelf.position.y = shelfHeight / 2 + 0.05; // Regale leicht über dem Boden positionieren
-    shelf.position.z = -shelfWidth / 2 - index * (shelfLength + dist); // Z-Achse bleibt konstant (eine Linie)
-    if (x < 0) {
+    shelf.position.z = -shelfWidth / 2 - posCounter * (shelfWidth + dist); // Z-Achse bleibt konstant (eine Linie)
+    if (currPos < 0) {
       shelf.rotation.y = Math.PI / 2;
     } else {
       shelf.rotation.y = -Math.PI / 2;
