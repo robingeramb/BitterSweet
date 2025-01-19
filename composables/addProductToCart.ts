@@ -68,23 +68,32 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
 
   // Aufgabe erfüllt
 
-  const targetNames = ["Penne Rigate Nudeln", "Tomatensauce"];
+  const targetCategories = ["noodles", "tomatosauce", "fertig", "drinks", "snacks"];
+  let drinksCount = 0;
 
   productsInCart.forEach(element => {
-    if (targetNames.includes(element.productName)) {
+    if (targetCategories.includes(element.category)) {
       
-
       if (element.category == "noodles") {
         noodelsCheck.value = true;
-      } else {
+      } else if (element.category == "tomatosauce") {
         sauceCheck.value = true;
+      } else if (element.category == "fertig") {
+        sauceCheck.value = true;
+        noodelsCheck.value = true;
+      } else if (element.category == "snacks") {
+        snacksCheck.value = true;
+      } else if (element.category == "drinks") {
+        drinksCount++;
       }
     }
   });
 
+  if(drinksCount >= 3) {
+    drinksCheck.value = true;
+  }
  
-
-  if (noodelsCheck.value && sauceCheck.value) {
+  if (noodelsCheck.value && sauceCheck.value && drinksCheck.value && snacksCheck.value) {
     taskDone.value = true;
   }
 

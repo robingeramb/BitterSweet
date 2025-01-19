@@ -76,24 +76,24 @@
     </div>
     <div
       v-if="started && !gameOver && !endScreen && clockStart"
-      class="fixed top-5 min-w-24 right-5 bg-gray-900 bg-opacity-50 text-white text-xl text-center font-medium px-4 py-4 rounded-lg shadow"
+      class="fixed flex-col flex top-5 min-w-24 right-5 background-element text-xl text-center font-medium px-4 py-4 rounded-sm"
     >
-      <h3 class="hdl mb-3">Shopping List</h3>
+      <h3 class="handwritten text-black m-3">Shopping List</h3>
       <div class="flex gap-3 items-center">
-        <div class="checkbox mb-1">
+        <div class="checkbox mb-1 ml-3">
           <div
-            class="border-white flex items-center justify-center border-2 rounded-md h-5 w-5"
+            class="border-black flex items-center justify-center border-2 rounded-md h-5 w-5"
           >
             <svg
               v-if="noodelsCheck"
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
             >
               <path
                 fill="none"
-                stroke="currentColor"
+                stroke="black"
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="4"
@@ -102,23 +102,23 @@
             </svg>
           </div>
         </div>
-        <div>Nudeln</div>
+        <div class="handwritten text-sm text-black">Noodles</div>
       </div>
       <div class="flex gap-3 items-center">
-        <div class="checkbox mb-1">
+        <div class="checkbox mb-1 ml-3">
           <div
-            class="border-white flex items-center justify-center border-2 rounded-md h-5 w-5"
+            class="border-black flex items-center justify-center border-2 rounded-md h-5 w-5"
           >
             <svg
               v-if="sauceCheck"
               xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
             >
               <path
                 fill="none"
-                stroke="currentColor"
+                stroke="black"
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="4"
@@ -127,7 +127,57 @@
             </svg>
           </div>
         </div>
-        <div>Soße</div>
+        <div class="handwritten text-sm text-black">Sauce</div>
+      </div>
+      <div class="flex gap-3 items-center">
+        <div class="checkbox mb-1 ml-3">
+          <div
+            class="border-black flex items-center justify-center border-2 rounded-md h-5 w-5"
+          >
+            <svg
+              v-if="drinksCheck"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill="none"
+                stroke="black"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="4"
+                d="m5 12l5 5L20 7"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="handwritten text-sm text-black">3 Drinks</div>
+      </div>
+      <div class="flex gap-3 items-center">
+        <div class="checkbox mb-1 ml-3">
+          <div
+            class="border-black flex items-center justify-center border-2 rounded-md h-5 w-5"
+          >
+            <svg
+              v-if="snacksCheck"
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fill="none"
+                stroke="black"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="4"
+                d="m5 12l5 5L20 7"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="handwritten text-sm text-black">Snacks</div>
       </div>
     </div>
   </div>
@@ -206,6 +256,22 @@ body {
 
 .hdl {
   font-family: "Gardez", "firula";
+}
+
+@font-face {
+  font-family: 'handwritten';
+  src: url('/fonts/CoalhandLuke TRIAL.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.background-element {
+  background-image: url('/images/paper.png');
+  background-size: cover;
+}
+
+.handwritten {
+  font-family: "handwritten", sans-serif;
 }
 
 .background {

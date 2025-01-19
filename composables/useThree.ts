@@ -51,9 +51,11 @@ export let productsInCart = [];
 export const loadingProgress = ref(0);
 export const loadingMessage = ref();
 export const loadedItems = ref(0);
-export const noodelsCheck = ref(false);
 export const scrollValue = ref(4);
 export const sauceCheck = ref(false);
+export const noodelsCheck = ref(false);
+export const snacksCheck = ref(false);
+export const drinksCheck = ref(false);
 export const loadingManager = new LoadingManager(
   // Callback: Wenn alles geladen ist
   () => {
