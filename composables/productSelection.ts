@@ -12,7 +12,7 @@ const productsGrid = [
   { x: 1, z: 1 },
 ];
 
-const scaleAmount = 0.5;
+const scaleAmount = 0.7;
 export let productView = ref(false);
 export let selectedProduct = ref();
 export let hoveredProduct = ref();
@@ -21,7 +21,7 @@ let clickedObject;
 export const hoveredMouseX = ref();
 export const hoveredMouseY = ref();
 const mouse = new THREE.Vector2();
-const raycaster = new THREE.Raycaster();
+export const raycaster = new THREE.Raycaster();
 let previousMousePosition = { x: 0, y: 0 };
 
 export function clickEvent(event) {
@@ -96,7 +96,7 @@ export function clickEvent(event) {
 }
 
 export function productHover() {
-  window.addEventListener("mousemove", checkOverProduct);
+  //window.addEventListener("mousemove", checkOverProduct);
 }
 
 export function selectedProductToCart() {
