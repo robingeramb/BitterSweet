@@ -152,7 +152,7 @@
             </svg>
           </div>
         </div>
-        <div class="handwritten text-sm text-black">3 Drinks</div>
+        <div class="handwritten text-sm text-black">{{ drinksCount }}/3 Drinks</div>
       </div>
       <div class="flex gap-3 items-center">
         <div class="checkbox mb-1 ml-3">

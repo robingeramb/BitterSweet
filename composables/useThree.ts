@@ -29,7 +29,7 @@ import { ThreeMFLoader } from "three/examples/jsm/Addons.js";
 import { Spector } from "spectorjs";
 
 // Spector initialisieren
-const spector = new Spector();
+//const spector = new Spector();
 export const scene = new Scene();
 export const shouldUpdatePhysics = ref(false);
 export let _composer: EffectComposer;
@@ -56,6 +56,7 @@ export const sauceCheck = ref(false);
 export const noodelsCheck = ref(false);
 export const snacksCheck = ref(false);
 export const drinksCheck = ref(false);
+export let drinksCount = ref(0);
 export const loadingManager = new LoadingManager(
   // Callback: Wenn alles geladen ist
   () => {
@@ -77,7 +78,7 @@ export const textureLoader = new TextureLoader(loadingManager);
 
 export function useThree() {
   function initThree(canvasMountId: string) {
-    spector.displayUI();
+    //spector.displayUI();
     const canvas = document.getElementById(canvasMountId)! as HTMLCanvasElement;
     const ambientLight = new AmbientLight(0xffffff, 0.2);
 
