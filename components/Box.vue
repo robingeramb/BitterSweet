@@ -90,8 +90,6 @@ function checkIntersects() {
       } else {
         clickable.value = true;
       }
-
-      console.log(intersects);
     } else {
       clickable.value = false;
     }
@@ -149,10 +147,10 @@ function setupFloor(): void {
     1,
     1
   );
-  const floorGeometry = new BoxGeometry(floorLength + 4, 0.1, floorLength + 4);
+  const floorGeometry = new BoxGeometry(floorLength + 6, 0.1, floorLength + 6);
 
   _floor = new Mesh(floorGeometry, ceramicMaterial);
-  _floor.position.set(0, -0.49, -floorLength / 2 + 2);
+  _floor.position.set(0, -0.49, -floorLength / 2 + 4);
   _floor.receiveShadow = true;
   scene.add(_floor);
 }
@@ -171,10 +169,10 @@ function setupRoof(): void {
     0.1,
     0.1
   );
-  const roofGeometry = new BoxGeometry(floorLength + 4, 0.1, floorLength + 4);
+  const roofGeometry = new BoxGeometry(floorLength + 6, 0.1, floorLength + 6);
 
   _roof = new Mesh(roofGeometry, roofMaterial);
-  _roof.position.set(0, 3.16, -floorLength / 2 + 2);
+  _roof.position.set(0, 3.16, -floorLength / 2 + 4);
   _roof.material.transparent = true;
   scene.add(_roof);
 }
@@ -313,12 +311,13 @@ defineExpose({ leaveSelectMode, setupScene });
 </script>
 
 <template>
-  <div class="cursor-none">
+  <div class="cursor-none fixed top-0 left-0">
     <canvas class="cursor-none" id="mountId" width="700" height="500" />
     <ProductSelectMenu class="cursor-none" v-if="selectMode" />
     <Cursor
       :mousePos="mousePos"
       :clickable="clickable"
+      v-if="clockStart"
       class="cursor-none pointer-events-none"
     />
   </div>

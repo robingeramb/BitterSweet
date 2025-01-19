@@ -62,18 +62,22 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
 
   sugarCounter.value += clickedObject.userData.sugarAmount;
   productSelection.add(addedProduct);
-  productsInCart.push(clickedObject.userData)
-  console.log(productsInCart)
+  productsInCart.push(clickedObject.userData);
   deleteObjekt(clickedObject);
 
   // Aufgabe erfüllt
 
-  const targetCategories = ["noodles", "tomatosauce", "fertig", "drinks", "snacks"];
+  const targetCategories = [
+    "noodles",
+    "tomatosauce",
+    "fertig",
+    "drinks",
+    "snacks",
+  ];
   let drinksCount = 0;
 
-  productsInCart.forEach(element => {
+  productsInCart.forEach((element) => {
     if (targetCategories.includes(element.category)) {
-      
       if (element.category == "noodles") {
         noodelsCheck.value = true;
       } else if (element.category == "tomatosauce") {
@@ -89,11 +93,16 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
     }
   });
 
-  if(drinksCount >= 3) {
+  if (drinksCount >= 3) {
     drinksCheck.value = true;
   }
- 
-  if (noodelsCheck.value && sauceCheck.value && drinksCheck.value && snacksCheck.value) {
+
+  if (
+    noodelsCheck.value &&
+    sauceCheck.value &&
+    drinksCheck.value &&
+    snacksCheck.value
+  ) {
     taskDone.value = true;
   }
 

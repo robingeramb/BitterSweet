@@ -26,6 +26,7 @@ import { Spector } from "spectorjs";
 // Spector initialisieren
 //const spector = new Spector();
 export const scene = new Scene();
+export const clockStart = ref(false);
 export const shouldUpdatePhysics = ref(false);
 export let _composer: EffectComposer;
 export const camera = new PerspectiveCamera(50, 200 / 200, 0.1, 30);
@@ -72,7 +73,7 @@ export const textureLoader = new TextureLoader(loadingManager);
 
 export function useThree() {
   function initThree(canvasMountId: string) {
-    // spector.displayUI();
+    //spector.displayUI();
     const canvas = document.getElementById(canvasMountId)! as HTMLCanvasElement;
     const ambientLight = new AmbientLight(0xffffff, 0.2);
 
