@@ -18,6 +18,7 @@ let _renderer: WebGLRenderer;
 let _renderLoopId: number;
 let _floor: Mesh;
 let _roof: Mesh;
+let clickable = ref(false);
 
 /* --- Constants --- */
 const floorLength = 20;
@@ -38,8 +39,64 @@ const canvas = computed(
 watch(() => props.scrollVal, moveCameraZ);
 watch(
   () => [props.mousePos.x, props.mousePos.y],
-  ([newX, newY]) => moveCameraXY(newX, newY)
+  ([newX, newY]) => {
+    moveCameraXY(newX, newY), checkIntersects();
+  }
 );
+
+function checkIntersects() {
+  mouse.x = (props.mousePos.x / window.innerWidth) * 2 - 1;
+  mouse.y = -(props.mousePos.y / window.innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  let intersects;
+
+  hoveredMouseX.value = props.mousePos.x;
+  hoveredMouseY.value = props.mousePos.y;
+  raycaster.setFromCamera(mouse, camera);
+  if (productView.value) {
+    intersects = raycaster.intersectObjects([selectedProduct]);
+    if (intersects.length > 0) {
+      let hoveredObject = intersects[0].object;
+      if (
+        hoveredObject.userData &&
+        hoveredObject.userData.productName != undefined
+      ) {
+        hoveredProduct.value = hoveredObject.userData.productName;
+      } else {
+        hoveredProduct.value = undefined;
+      }
+    }
+  } else {
+    intersects = raycaster.intersectObjects(shelves);
+    if (taskDone.value) {
+      let cashCounter = raycaster.intersectObjects([cashRegister]);
+      if (cashCounter.length > 0) {
+        intersects.push(cashCounter[0]);
+      }
+    }
+    if (intersects.length > 0) {
+      if (selectMode.value) {
+        let hoveredObject = intersects[0].object;
+        if (
+          hoveredObject.userData &&
+          hoveredObject.userData.productName != undefined
+        ) {
+          hoveredProduct.value = hoveredObject.userData.productName;
+          clickable.value = true;
+        } else {
+          hoveredProduct.value = undefined;
+          clickable.value = false;
+        }
+      } else {
+        clickable.value = true;
+      }
+
+      console.log(intersects);
+    } else {
+      clickable.value = false;
+    }
+  }
+}
 
 /* --- Functions --- */
 async function setupScene(): Promise<void> {
@@ -71,6 +128,10 @@ async function setupScene(): Promise<void> {
   //createShelves(1.6, floorLength, shelfWidth, shelfLength, dist, shelfHeight);
 
   postProcessing(cashRegister);
+
+  lights.children.forEach((element) => {
+    element.children[0].shadow.needsUpdate = false;
+  });
   _renderLoopId = requestAnimationFrame(renderLoop);
 }
 
@@ -218,6 +279,7 @@ function renderLoop(): void {
   } else {
     _renderer.render(scene, camera);
   }
+
   _renderLoopId = requestAnimationFrame(renderLoop);
 }
 
@@ -251,6 +313,13 @@ defineExpose({ leaveSelectMode, setupScene });
 </script>
 
 <template>
-  <canvas id="mountId" width="700" height="500" />
-  <ProductSelectMenu v-if="selectMode" />
+  <div class="cursor-none">
+    <canvas class="cursor-none" id="mountId" width="700" height="500" />
+    <ProductSelectMenu class="cursor-none" v-if="selectMode" />
+    <Cursor
+      :mousePos="mousePos"
+      :clickable="clickable"
+      class="cursor-none pointer-events-none"
+    />
+  </div>
 </template>

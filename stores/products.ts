@@ -25,14 +25,14 @@ export const useProductsStore = defineStore({
         category: "noodles",
       },
       coke: {
-        sugarAmount: 7,
+        sugarAmount: 53,
         productName: "Coke",
         scale: 0.34,
         rotation: 0,
         model: "colaglassCenter.glb",
         meshMode: false,
-        amount: 150,
-        amountPerPortion: 150,
+        amount: 500,
+        amountPerPortion: 500,
         category: "fruit",
       },
       tomatosauce: {

@@ -2,11 +2,7 @@ import {
   PerspectiveCamera,
   Scene,
   WebGLRenderer,
-  RectAreaLight,
   Color,
-  BoxGeometry,
-  Mesh,
-  MeshStandardMaterial,
   AmbientLight,
   LoadingManager,
   TextureLoader,
@@ -24,12 +20,11 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 export const world = new CANNON.World();
 
 import { disposeObject } from "@/utils/disposeUtils";
-import { ThreeMFLoader } from "three/examples/jsm/Addons.js";
 
 import { Spector } from "spectorjs";
 
 // Spector initialisieren
-const spector = new Spector();
+//const spector = new Spector();
 export const scene = new Scene();
 export const shouldUpdatePhysics = ref(false);
 export let _composer: EffectComposer;
@@ -75,7 +70,7 @@ export const textureLoader = new TextureLoader(loadingManager);
 
 export function useThree() {
   function initThree(canvasMountId: string) {
-    spector.displayUI();
+    // spector.displayUI();
     const canvas = document.getElementById(canvasMountId)! as HTMLCanvasElement;
     const ambientLight = new AmbientLight(0xffffff, 0.2);
 
@@ -119,7 +114,7 @@ export function useThree() {
     renderer.shadowMap.type = PCFSoftShadowMap;
     renderer.physicallyCorrectLights = true; // Enable physical lighting
     renderer.setSize(window.innerWidth, window.innerHeight);
-    //renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
+    renderer.setPixelRatio(window.devicePixelRatio); // Nutzt die native Pixeldichte des Geräts
     _composer = new EffectComposer(renderer);
 
     return { renderer };
