@@ -17,7 +17,7 @@
               <p class="text-red-900">{{ child.sugarAmount }}g sugar / ≈ {{ Math.round(child.sugarAmount / 3) }}g per person</p>
             </li>
             <div class="border-t border-dashed border-gray-500 mb-4 mt-2 -mx-10"></div>
-            <p class="text-5xl font-bold text-orange-800">
+            <p class="text-5xl font-bold text-red-800">
               <span v-html="sugarCounter"></span>g sugar
             </p>
             <p class="m-3 text-red-800">≈ {{Math.round(sugarCounter / 3)}}g per person. </p>
@@ -38,7 +38,7 @@
             </li>
             <div class="border-t border-dashed border-gray-500 mb-4 mt-2 -mx-10"></div>
             <p class="text-xs text-slate-300 mb-2">Based on that:</p>
-            <p class="text-red-500 font-semibold text-xl" v-html="formattedText"></p>
+            <p class="text-red-500 font-semibold text-md text-left" v-html="formattedText"></p>
 
          </ul>
         </div>
@@ -90,46 +90,40 @@ function findSugarRange() {
   if (!found) {
       console.log(`sugarPerPerson (${sugarPerPerson}) liegt in keinem definierten Bereich.`);
     } else {
-      addParagraphsToString(current.description, 20);
+      formattedText = addParagraphsToString(current.description, 20);
   }
 }
+findSugarRange();
 
-function addParagraphsToString(text: string, maxLength: number) {
-  let result = '';
+function addParagraphsToString(text: string, maxLength: number): string {
+  let result = '<p>'; // Beginne mit einem Absatz
   let currentLength = 0;
   let currentWord = '';
-  
-  // Wir durchlaufen den Text Zeichen für Zeichen
+
   for (let i = 0; i < text.length; i++) {
     const char = text[i];
-    
-    // Wenn wir ein Leerzeichen oder ein Satzzeichen finden, haben wir ein ganzes Wort
+
     if (char === ' ' || char === '.' || char === ',' || char === '!' || char === '?') {
-      currentWord += char; // Füge auch das Leerzeichen oder Satzzeichen hinzu
-      result += currentWord; // Das Wort in den Ergebnis-String einfügen
-      currentLength += currentWord.length; // Die Länge des aktuellen Wortes addieren
+      currentWord += char;
+      result += currentWord;
+      currentLength += currentWord.length;
 
-      // Wenn wir die maximale Länge erreicht haben, fügen wir einen Absatz ein
       if (currentLength >= maxLength) {
-        result += '\n\n'; // Doppelter Zeilenumbruch für Absatz
-        currentLength = 0; // Zurücksetzen der aktuellen Länge
+        result += '</p><p>'; // Neuen HTML-Absatz hinzufügen
+        currentLength = 0;
       }
-
-      // Das Wort zurücksetzen, um das nächste zu speichern
       currentWord = '';
     } else {
-      // Wenn es kein Leerzeichen oder Satzzeichen ist, fügen wir es zum aktuellen Wort hinzu
       currentWord += char;
     }
   }
 
-  // Am Ende sicherstellen, dass das letzte Wort hinzugefügt wird
   if (currentWord) {
     result += currentWord;
   }
+  result += '</p>'; // Letzten Absatz schließen
 
-  formattedText = result;
-  console.log(formattedText);
+  return result;
 }
 
 //Check how many items in cart and response dynamic layout
