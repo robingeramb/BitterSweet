@@ -6,25 +6,28 @@
       class="flex background flex-col items-center justify-center h-screen bg-neutral-950 text-white"
     >
       <div v-if="!started" class="flex flex-col items-center">
-        <div class="text-center mb-16">
+        <div class="text-center flex items-center flex-col mb-16">
           <div class="relative">
-            <h1 class="text-8xl hdl relative z-10 mb-16 text-orange-800">
-              Bitter-Sweet
-            </h1>
-            <h1
+            <img
+              class="w-[40rem] translate-x-3"
+              src="/images/Logo.png"
+              alt=""
+            />
+
+            <!---<h1
               class="absolute top-2 right-2 blur-sm whitespace-nowrap text-8xl hdl mb-16 text-black opacity-20"
             >
               Bitter-Sweet
-            </h1>
+            </h1>--->
           </div>
 
           <p
             class="bg-black bg-opacity-50 backdrop-blur-sm border-opacity-70 shadow-xl border-white border-[1px] p-10 rounded-2xl mb-8 text-white"
           >
-            Deine Eltern kommen heute Abend zu Besuch. <br />
-            Du möchtest eine gute Pasta für 3 Personen kochen und <br />
-            brauchst noch Getränke und Snacks. <br />
-            Du bist spät dran und hast nur 5 Minuten für den Einkauf.
+            Your parents are coming to visit tonight. <br />You want to cook a
+            good pasta meal for 3 people and and still need drinks and
+            snacks.<br />
+            You're running late and only have 5 minutes to do the shopping.
           </p>
           <h1 class="text-4xl font-bold">{{ formattedTime }}</h1>
         </div>
@@ -152,7 +155,9 @@
             </svg>
           </div>
         </div>
-        <div class="handwritten text-sm text-black">{{ drinksCount }}/3 Drinks</div>
+        <div class="handwritten text-sm text-black">
+          {{ drinksCount }}/3 Drinks
+        </div>
       </div>
       <div class="flex gap-3 items-center">
         <div class="checkbox mb-1 ml-3">
@@ -186,7 +191,7 @@
 <script setup>
 import { ref } from "vue";
 const emit = defineEmits(["startSetup"]);
-const time = ref(600); // 5 minutes in seconds
+const time = ref(300); // 5 minutes in seconds
 const started = ref(false);
 
 const gameOver = ref(false);
@@ -236,7 +241,7 @@ const startCountdown = () => {
 };
 
 const restart = () => {
-  time.value = 10; // Reset to 5 minutes
+  time.value = 300; // Reset to 5 minutes
   //started.value = false;
   gameOver.value = false;
   clearInterval(interval);

@@ -68,19 +68,18 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   // Aufgabe erfüllt
 
   const targetCategories = ["noodles", "sauces", "fertig", "drinks", "snacks"];
-  const countedDrinks = new Set<string>();  // Set zum Nachverfolgen verarbeiteter IDs
+  const countedDrinks = new Set<string>(); // Set zum Nachverfolgen verarbeiteter IDs
 
   productsInCart.forEach((element) => {
     if (targetCategories.includes(element.category)) {
-
       if (element.category === "drinks") {
         // Überprüfen, ob das Getränk noch nicht gezählt wurde und ob die Zählung unter 3 liegt
         if (!countedDrinks.has(element.id) && drinksCount.value < 3) {
-          drinksCount.value++;  // Erhöhe den Zähler nur für neue Getränke, wenn der Zähler unter 3 liegt
-          countedDrinks.add(element.id);  // Markiere dieses Getränk als gezählt
+          drinksCount.value++; // Erhöhe den Zähler nur für neue Getränke, wenn der Zähler unter 3 liegt
+          countedDrinks.add(element.id); // Markiere dieses Getränk als gezählt
         }
       }
-  
+
       if (element.category == "noodles") {
         noodelsCheck.value = true;
       } else if (element.category == "sauces") {
@@ -94,7 +93,7 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
     }
   });
 
-  if(drinksCount.value >= 3) {
+  if (drinksCount.value >= 3) {
     drinksCheck.value = true;
   }
 

@@ -1,6 +1,11 @@
 <template>
   <EndScreen v-if="endScreen" @restartFunction="setRestartFunction" />
-  <Countdown ref="countdown" class="z-20" @startSetup="startSetup" />
+  <Countdown
+    v-if="!endScreen"
+    ref="countdown"
+    class="z-20"
+    @startSetup="startSetup"
+  />
   <Box
     v-if="!endScreen"
     ref="threeJS"
