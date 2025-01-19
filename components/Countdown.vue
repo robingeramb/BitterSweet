@@ -40,7 +40,7 @@
           class="bg-orange-300 bg-opacity-100 h-4 backdrop-blur-sm w-80 relative rounded-full overflow-hidden"
         >
           <div
-            :style="{ width: loadingProgress + '%' }"
+            :style="{ width: (loadedItems / 130) * 100 + '%' }"
             class="h-full bg-orange-500"
           ></div>
         </div>
@@ -188,7 +188,7 @@ import { ref } from "vue";
 const emit = defineEmits(["startSetup"]);
 const time = ref(600); // 5 minutes in seconds
 const started = ref(false);
-const clockStart = ref(false);
+
 const gameOver = ref(false);
 let interval = null;
 
@@ -197,10 +197,12 @@ const startGame = () => {
   started.value = true;
   if (
     loadingProgress.value >= 100 &&
-    loadedItems.value > 30 &&
+    loadedItems.value > 128 &&
     clockStart.value == false
   ) {
-    startCountdown();
+    setTimeout(() => {
+      startCountdown();
+    }, 200);
   }
 };
 
@@ -210,10 +212,13 @@ watch(
     if (
       newValue >= 100 &&
       started.value &&
-      loadedItems.value > 30 &&
+      loadedItems.value > 128 &&
       clockStart.value == false
     ) {
-      startCountdown(); // Funktion aufrufen
+      setTimeout(() => {
+        startCountdown();
+      }, 200);
+      // Funktion aufrufen
     }
   }
 );
@@ -259,14 +264,14 @@ body {
 }
 
 @font-face {
-  font-family: 'handwritten';
-  src: url('/fonts/CoalhandLuke TRIAL.ttf') format('truetype');
+  font-family: "handwritten";
+  src: url("/fonts/CoalhandLuke TRIAL.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
 
 .background-element {
-  background-image: url('/images/paper.png');
+  background-image: url("/images/paper.png");
   background-size: cover;
 }
 

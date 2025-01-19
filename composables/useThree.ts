@@ -27,6 +27,7 @@ import { Spector } from "spectorjs";
 //const spector = new Spector();
 //const spector = new Spector();
 export const scene = new Scene();
+export const clockStart = ref(false);
 export const shouldUpdatePhysics = ref(false);
 export let _composer: EffectComposer;
 export const camera = new PerspectiveCamera(50, 200 / 200, 0.1, 30);

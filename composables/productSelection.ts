@@ -12,7 +12,7 @@ const productsGrid = [
   { x: 1, z: 1 },
 ];
 
-const scaleAmount = 0.7;
+const scaleAmount = 0.6;
 export let productView = ref(false);
 export let selectedProduct = ref();
 export let hoveredProduct = ref();
@@ -66,8 +66,6 @@ export function clickEvent(event) {
       );
     } else {
       if (productView.value === false) {
-        productView.value = true;
-
         while (
           clickedObject.parent &&
           clickedObject.parent !== scene &&
@@ -75,17 +73,20 @@ export function clickEvent(event) {
         ) {
           clickedObject = clickedObject.parent;
         }
-        selectedProduct = clickedObject.clone();
-        if (selectedProduct.isMesh) {
-          selectedProduct.geometry = clickedObject.geometry.clone();
-          selectedProduct.geometry.center();
+        if (clickedObject.userData.productName) {
+          productView.value = true;
+          selectedProduct = clickedObject.clone();
+          if (selectedProduct.isMesh) {
+            selectedProduct.geometry = clickedObject.geometry.clone();
+            selectedProduct.geometry.center();
+          }
+
+          selectedProduct.scale.copy(clickedObject.scale);
+          clickedObject.visible = false;
+
+          activateProductView(selectedProduct);
+          addRotationControls();
         }
-
-        selectedProduct.scale.copy(clickedObject.scale);
-        clickedObject.visible = false;
-
-        activateProductView(selectedProduct);
-        addRotationControls();
       } else if (productView.value) {
         if (clickedObject == selectedProduct) {
           console.log("fitting");

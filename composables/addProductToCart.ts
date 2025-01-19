@@ -62,8 +62,7 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
 
   sugarCounter.value += clickedObject.userData.sugarAmount;
   productSelection.add(addedProduct);
-  productsInCart.push(clickedObject.userData)
-  console.log(productsInCart)
+  productsInCart.push(clickedObject.userData);
   deleteObjekt(clickedObject);
 
   // Aufgabe erfüllt
@@ -71,7 +70,7 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   const targetCategories = ["noodles", "sauces", "fertig", "drinks", "snacks"];
   const countedDrinks = new Set<string>();  // Set zum Nachverfolgen verarbeiteter IDs
 
-  productsInCart.forEach(element => {
+  productsInCart.forEach((element) => {
     if (targetCategories.includes(element.category)) {
 
       if (element.category === "drinks") {
@@ -98,8 +97,13 @@ export const useAddProductToCart = (clickedObject, scaleAmount: number) => {
   if(drinksCount.value >= 3) {
     drinksCheck.value = true;
   }
- 
-  if (noodelsCheck.value && sauceCheck.value && drinksCheck.value && snacksCheck.value) {
+
+  if (
+    noodelsCheck.value &&
+    sauceCheck.value &&
+    drinksCheck.value &&
+    snacksCheck.value
+  ) {
     taskDone.value = true;
   }
 
