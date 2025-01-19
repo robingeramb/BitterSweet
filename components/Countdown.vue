@@ -197,7 +197,7 @@ const startGame = () => {
   started.value = true;
   if (
     loadingProgress.value >= 100 &&
-    loadedItems.value > 20 &&
+    loadedItems.value > 30 &&
     clockStart.value == false
   ) {
     startCountdown();
@@ -210,7 +210,7 @@ watch(
     if (
       newValue >= 100 &&
       started.value &&
-      loadedItems.value > 20 &&
+      loadedItems.value > 30 &&
       clockStart.value == false
     ) {
       startCountdown(); // Funktion aufrufen

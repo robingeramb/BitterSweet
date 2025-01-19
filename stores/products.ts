@@ -49,7 +49,7 @@ export const useProductsStore = defineStore({
         sugarAmount: 20,
         productName: "Monster energy",
         amount: 500,
-        scale: 0.3,
+        scale: 0.25,
         rotation: -Math.PI,
         model: "monster.glb",
         meshMode: false,
@@ -199,7 +199,7 @@ export const useProductsStore = defineStore({
       chips: {
         sugarAmount: 2,
         productName: "Chips",
-        scale: 0.4,
+        scale: 0.35,
         meshMode: false,
         model: "chips.glb",
         amount: 500,
