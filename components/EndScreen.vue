@@ -33,7 +33,7 @@
       </div>
 
       <div
-        ref="consepuences"
+        ref="dailyLimit"
         class="flex z-10 top-1/2 -translate-y-1/2 flex-col items-center w-full absolute justify-center"
       >
         <DailyLimitDisplay :formattedText="formattedText" />
@@ -44,14 +44,17 @@
           class="mb-40"
         />
       </div>
+      <div ref="consequences" class="opacity-0 z-20">
+        <Consequences
+          class="absolute left-1/2 -translate-x-1/2 z-20 top-[200px] -translate-y-1/2"
+          :consList="consList"
+        />
+      </div>
+
       <div
         v-if="currSlide >= 3"
         class="flex top-1/2 -translate-y-1/2 flex-col items-center w-full absolute justify-center"
       >
-        <Consequences
-          class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
-          :formattedText="formattedText"
-        />
         <SugarCubes />
       </div>
     </div>
@@ -93,9 +96,10 @@ import gsap from "gsap";
 import { useSugarEffects } from "~/stores/effects";
 const receipt = ref();
 const receiptComp = ref();
-const consepuences = ref();
+const dailyLimit = ref();
 const secondText = ref();
 const firstText = ref();
+const consequences = ref();
 const effectsStore = useSugarEffects();
 const effectList = effectsStore.effects;
 const productCount = productsInCart.length;
@@ -103,8 +107,9 @@ let showTitel = true;
 let showMainTitel = true;
 let formattedText: string;
 const showConsequences = ref(false);
-
+const consList = ref([]);
 const currSlide = ref(0);
+const prevSlide = ref(0);
 
 function setCurrSlide(index: number) {
   currSlide.value = index;
@@ -134,13 +139,13 @@ function setCurrSlide(index: number) {
       ease: "power3.out", // Schnellerer Verlauf am Ende
     });
   }
-  if (currSlide.value < 2) {
+  if (currSlide.value < 2 && prevSlide.value > currSlide.value) {
     gsap.to(receipt.value, {
       bottom: 300 - receipt.value.offsetHeight,
       duration: 1,
       delay: 0.5,
     });
-    gsap.to(consepuences.value, {
+    gsap.to(dailyLimit.value, {
       opacity: 0,
       duration: 1, // Kürzerer Zeitraum für den Rest
       ease: "power3.out", // Schnellerer Verlauf am Ende
@@ -148,19 +153,28 @@ function setCurrSlide(index: number) {
     receiptComp.value.fadeBack(1);
     showConsequences.value = false;
   }
+  if (currSlide.value == 2 && prevSlide.value < currSlide.value) {
+    scrollToReceipt();
+    //showConsequences.value = true;
+  }
   if (currSlide.value < 3) {
     gsap.to(receipt.value, {
       y: 0,
       duration: 0.75, // Kürzerer Zeitraum für den Rest
       ease: "power3.out", // Schnellerer Verlauf am Ende
     });
-    gsap.to(consepuences.value, {
+    gsap.to(dailyLimit.value, {
       y: 0,
 
       duration: 0.75, // Kürzerer Zeitraum für den Rest
       ease: "power3.out", // Schnellerer Verlauf am Ende
     });
   }
+  if (currSlide.value == 3 && prevSlide.value < currSlide.value) {
+    scrollToCanvas();
+    //showConsequences.value = true;
+  }
+  prevSlide.value = currSlide.value;
 }
 
 onMounted(() => {
@@ -168,7 +182,7 @@ onMounted(() => {
     bottom: 300 - receipt.value.offsetHeight,
     duration: 0,
   });
-  gsap.to(consepuences.value, {
+  gsap.to(dailyLimit.value, {
     opacity: 0,
     duration: 0, // Kürzerer Zeitraum für den Rest
     ease: "power3.out", // Schnellerer Verlauf am Ende
@@ -222,9 +236,15 @@ function scrollToCanvas() {
     duration: 2, // Kürzerer Zeitraum für den Rest
     ease: "power3.out", // Schnellerer Verlauf am Ende
   });
-  gsap.to(consepuences.value, {
+  gsap.to(dailyLimit.value, {
     y: -1000,
     duration: 2, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+  });
+  gsap.to(consequences.value, {
+    opacity: 1,
+    delay: 5,
+    duration: 0.75, // Kürzerer Zeitraum für den Rest
     ease: "power3.out", // Schnellerer Verlauf am Ende
   });
 }
@@ -246,7 +266,7 @@ function scrollToReceipt() {
         duration: 1.2, // Kürzerer Zeitraum für den Rest
         ease: "power3.out", // Schnellerer Verlauf am Ende
       });
-      gsap.to(consepuences.value, {
+      gsap.to(dailyLimit.value, {
         opacity: 1,
         delay: 0.7,
         duration: 0.75, // Kürzerer Zeitraum für den Rest
@@ -281,28 +301,11 @@ function findSugarRange() {
   let current;
   let sugarPerPerson = Math.round(sugarCounter.value / 3);
 
-  for (let i = 0; i < effectList.length - 1; i++) {
+  for (let i = 0; i < effectList.length; i++) {
     current = effectList[i];
-
-    //sugarPerPerson im aktuellen Bereich?
-    if (
-      sugarPerPerson >= current.sugarMinAmount &&
-      sugarPerPerson <= current.sugarMaxAmount
-    ) {
+    if (sugarPerPerson >= current.sugarMinAmount) {
+      consList.value.push(current);
       found = true;
-      break;
-    }
-
-    //sugarPerPerson zwischen Bereichen?
-    if (i < effectList.length - 1) {
-      const next = effectList[i + 1];
-      if (
-        sugarPerPerson > current.sugarMaxAmount &&
-        sugarPerPerson < next.sugarMinAmount
-      ) {
-        found = true;
-        break;
-      }
     }
   }
 
@@ -310,8 +313,6 @@ function findSugarRange() {
     console.log(
       `sugarPerPerson (${sugarPerPerson}) liegt in keinem definierten Bereich.`
     );
-  } else {
-    formattedText = addParagraphsToString(current.description, 60);
   }
 }
 findSugarRange();

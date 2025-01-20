@@ -25,8 +25,7 @@
             class="bg-black bg-opacity-50 backdrop-blur-sm border-opacity-70 shadow-xl border-white border-[1px] p-10 rounded-2xl mb-8 text-white"
           >
             Your parents are coming to visit tonight. <br />You want to cook a
-            good pasta meal for 3 people and and still need drinks and
-            snacks.<br />
+            good pasta meal for 3 people and still need drinks and snacks.<br />
             You're running late and only have 5 minutes to do the shopping.
           </p>
           <h1 class="text-4xl font-bold">{{ formattedTime }}</h1>
