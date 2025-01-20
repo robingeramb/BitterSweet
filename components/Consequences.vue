@@ -9,7 +9,7 @@
       </p>
       <ul
         ref="normalCont"
-        class="text-white scrollCont px-4 text-lg max-h-[22rem] overflow-y-scroll font-medium text-left max-w-[37rem] flex felx-col consList gap-4"
+        class="text-white scrollCont px-4 text-lg maxHcalc font-medium text-left max-w-[37rem] flex felx-col consList gap-4"
       >
         <li class="flex opacity-0 gap-6 items-center" v-for="item in consList">
           <div class="w-2 h-2 contain-size flex-0 rounded-full bg-white"></div>
@@ -31,7 +31,7 @@
       </p>
       <ul
         ref="shadowCont"
-        class="text-black scrollCont px-4 text-lg max-h-[22rem] overflow-hidden font-medium text-left max-w-[37rem] flex felx-col consList gap-4"
+        class="text-black scrollCont px-4 text-lg maxHcalc overflow-hidden font-medium text-left max-w-[37rem] flex felx-col consList gap-4"
       >
         <li
           class="flex bg-black opacity-0 gap-6 items-center"
@@ -54,6 +54,21 @@ interface Props {
   consList: Array<Object>;
 }
 const props = defineProps<Props>();
+
+onMounted(() => {
+  console.log(normalCont.value.scrollHeight);
+  if (normalCont.value.scrollHeight >= window.innerHeight - 400) {
+    normalCont.value.classList.add("overflow-y-scroll");
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (normalCont.value.scrollHeight >= window.innerHeight - 400) {
+    normalCont.value.classList.add("overflow-y-scroll");
+  } else {
+    normalCont.value.classList.remove("overflow-y-scroll");
+  }
+});
 
 const shadowCont = ref();
 const normalCont = ref();
@@ -119,6 +134,9 @@ defineExpose({ startFadeIn, fadeBack });
 </script>
 
 <style>
+.maxHcalc {
+  max-height: calc(100vh - 400px);
+}
 .consList {
   flex-direction: column;
 }
