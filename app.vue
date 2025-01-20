@@ -45,31 +45,39 @@ const handleWheel = (event) => {
     if (scrollValue.value <= -20) {
       scrollValue.value = -20;
     }
-    console.log(scrollValue.value);
   }
 
   lastScrollTime = currentTime;
 };
 
+const handleKeyDown = (event) => {
+  if (event.key === "Escape") {
+    scrollValue.value = savedPos.z;
+    threeJS.value.leaveSelectMode();
+    selectedProductToShelf();
+  }
+};
+
+function removeListeners() {
+  window.removeEventListener("wheel", handleWheel);
+  window.removeEventListener("mousemove", updateMousePosition);
+  window.removeEventListener("keydown", handleKeyDown);
+}
+
 function startSetup() {
   threeJS.value.setupScene();
 }
 
+watch(() => endScreen.value, removeListeners);
+
 onMounted(() => {
   window.addEventListener("wheel", handleWheel);
   window.addEventListener("mousemove", updateMousePosition);
-  window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      scrollValue.value = savedPos.z;
-      threeJS.value.leaveSelectMode();
-      selectedProductToShelf();
-    }
-  });
+  window.addEventListener("keydown", handleKeyDown);
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener("wheel", handleWheel);
-  window.removeEventListener("mousemove", updateMousePosition);
+  removeListeners();
 });
 </script>
 <style>

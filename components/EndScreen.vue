@@ -1,37 +1,42 @@
 <template>
   <div class="overflow-hidden relative bg-neutral-950 h-screen w-full">
-    <div class="endscreen w-full bg-neutral-950 flex flex-col">
+    <div class="endscreen w-full flex flex-col">
       <div
         class="flex items-center justify-center headlineContainer text-white"
       >
-        <div class="text-center flex flex-col items-center">
-          <h1 v-if="currSlide == 1" class="text-4xl max-w-[40rem] mb-6">
-            Grocerys are filled with sugar and we often dont even know about it
+        <div ref="secondText" class="opacity-0 z-10 text-center absolute">
+          <h1 class="text-3xl font-light text-center max-w-[40rem] mb-12">
+            Grocerys are filled with sugar and we often dont even know about it.
           </h1>
-          <p v-if="currSlide == 1" class="text-2xl mb-8 text-white">
-            We gave you a relatable scenario to visualise it for you
+          <p class="text-3xl font-light mb-8 text-center text-white">
+            We gave you a relatable scenario <br />to visualise it for you:
           </p>
-          <h1 v-if="currSlide == 0" class="text-4xl max-w-[40rem] mb-6">
-            Awesome! <br />
-            You have successfully completed your grocery shopping!
+        </div>
+        <div ref="firstText" class="opacity-0 z-10 absolute">
+          <h1 class="text-7xl text-center max-w-[40rem] mb-2">Awesome!</h1>
+          <h1 class="text-3xl font-light text-center max-w-[40rem] mb-6">
+            You have successfully completed <br />
+            your grocery shopping.
           </h1>
-          <p v-if="currSlide == 0" class="text-2xl mb-8 text-white">
+          <p
+            class="text-2xl font-semibold text-orange-500 mt-16 text-center text-white"
+          >
             But at what cost?
           </p>
         </div>
       </div>
       <div
-        class="flex flex-col items-center justify-center w-full absolute"
+        class="flex flex-col z-10 items-center justify-center w-full absolute"
         ref="receipt"
       >
         <Receipt ref="receiptComp" />
       </div>
 
       <div
-        :style="{ top: 600 + 'px' }"
-        class="flex flex-col items-center w-full absolute justify-center"
+        ref="consepuences"
+        class="flex z-10 top-1/2 -translate-y-1/2 flex-col items-center w-full absolute justify-center"
       >
-        <Consequences v-if="showConsequences" :formattedText="formattedText" />
+        <DailyLimitDisplay :formattedText="formattedText" />
         <Button
           v-if="showConsequences"
           @click="restartFunction()"
@@ -39,10 +44,19 @@
           class="mb-40"
         />
       </div>
-      <div class="flex items-center w-full justify-center"></div>
+      <div
+        v-if="currSlide >= 3"
+        class="flex top-1/2 -translate-y-1/2 flex-col items-center w-full absolute justify-center"
+      >
+        <Consequences
+          class="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2"
+          :formattedText="formattedText"
+        />
+        <SugarCubes />
+      </div>
     </div>
     <div
-      class="asideSection flex flex-col gap-4 left-10 absolute top-1/2 -translate-y-1/2"
+      class="asideSection flex flex-col gap-4 left-10 z-20 absolute top-1/2 -translate-y-1/2"
     >
       <div
         v-for="(items, index) in 5"
@@ -79,6 +93,9 @@ import gsap from "gsap";
 import { useSugarEffects } from "~/stores/effects";
 const receipt = ref();
 const receiptComp = ref();
+const consepuences = ref();
+const secondText = ref();
+const firstText = ref();
 const effectsStore = useSugarEffects();
 const effectList = effectsStore.effects;
 const productCount = productsInCart.length;
@@ -91,13 +108,58 @@ const currSlide = ref(0);
 
 function setCurrSlide(index: number) {
   currSlide.value = index;
+  if (currSlide.value == 0) {
+    gsap.to(firstText.value, {
+      opacity: 1,
+      delay: 0.75,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+    gsap.to(secondText.value, {
+      opacity: 0,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+  }
+  if (currSlide.value == 1) {
+    gsap.to(firstText.value, {
+      opacity: 0,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+    gsap.to(secondText.value, {
+      opacity: 1,
+      delay: 0.75,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+  }
   if (currSlide.value < 2) {
     gsap.to(receipt.value, {
       bottom: 300 - receipt.value.offsetHeight,
       duration: 1,
+      delay: 0.5,
+    });
+    gsap.to(consepuences.value, {
+      opacity: 0,
+      duration: 1, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
     });
     receiptComp.value.fadeBack(1);
     showConsequences.value = false;
+  }
+  if (currSlide.value < 3) {
+    gsap.to(receipt.value, {
+      y: 0,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+    gsap.to(consepuences.value, {
+      y: 0,
+
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
   }
 }
 
@@ -106,20 +168,45 @@ onMounted(() => {
     bottom: 300 - receipt.value.offsetHeight,
     duration: 0,
   });
+  gsap.to(consepuences.value, {
+    opacity: 0,
+    duration: 0, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+  });
+  gsap.to(firstText.value, {
+    opacity: 1,
+    duration: 0.75, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+  });
 });
 
 function next() {
   currSlide.value++;
-  console.log(receipt.value.offsetHeight);
+  if (currSlide.value == 1) {
+    gsap.to(firstText.value, {
+      opacity: 0,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+    gsap.to(secondText.value, {
+      opacity: 1,
+      delay: 0.75,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+  }
   if (currSlide.value == 2) {
     scrollToReceipt();
+    //showConsequences.value = true;
+  }
+  if (currSlide.value == 3) {
+    scrollToCanvas();
     //showConsequences.value = true;
   }
 }
 
 function back() {
   currSlide.value--;
-  console.log(receipt.value.offsetHeight);
   if (currSlide.value < 2) {
     gsap.to(receipt.value, {
       bottom: 300 - receipt.value.offsetHeight,
@@ -129,20 +216,45 @@ function back() {
   }
 }
 
-function scrollToReceipt() {
+function scrollToCanvas() {
   gsap.to(receipt.value, {
-    bottom: 300,
-    duration: 6.75,
+    y: -1000,
+    duration: 2, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+  });
+  gsap.to(consepuences.value, {
+    y: -1000,
+    duration: 2, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+  });
+}
+
+function scrollToReceipt() {
+  gsap.to(secondText.value, {
+    opacity: 0,
+    duration: 0.75, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+  });
+  gsap.to(receipt.value, {
+    bottom: window.innerHeight - 500,
+    duration: receipt.value.offsetHeight / 100,
     ease: "linear",
     onComplete: () => {
       // Zweiter Teil der Animation
       gsap.to(receipt.value, {
-        bottom: 600,
-        duration: 1.5, // Kürzerer Zeitraum für den Rest
+        bottom: window.innerHeight - 200,
+        duration: 1.2, // Kürzerer Zeitraum für den Rest
+        ease: "power3.out", // Schnellerer Verlauf am Ende
+      });
+      gsap.to(consepuences.value, {
+        opacity: 1,
+        delay: 0.7,
+        duration: 0.75, // Kürzerer Zeitraum für den Rest
         ease: "power3.out", // Schnellerer Verlauf am Ende
       });
     },
   });
+
   receiptComp.value.startFadeIn(6);
 }
 

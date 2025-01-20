@@ -11,7 +11,7 @@
       <li class="mb-4" v-for="(child, index) in productsInCart" :key="index">
         <p class="text-slate-800 text-xs">
           {{ child.amount }}g {{ child.productName || "Unbenannt" }}
-          <span class="opacity-0">:</span>
+          <span class="">:</span>
         </p>
         <p class="text-red-900 opacity-0">
           {{ Math.round(child.sugarAmount) }}g sugar / ≈
@@ -47,7 +47,7 @@ function startFadeIn(totalTime: number) {
     gsap.to(elements, {
       opacity: 1,
       stagger: totalTime / elements.length, // Zeitverzögerung zwischen den Elementen
-      duration: 0.5, // Dauer der Animation pro Element
+      duration: 0.75, // Dauer der Animation pro Element
     });
   }
 }
