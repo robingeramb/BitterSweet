@@ -2,6 +2,14 @@
   <div class="overflow-hidden relative bg-neutral-950 h-screen w-full">
     <div class="endscreen w-full flex flex-col">
       <div
+        ref="thirdText"
+        class="z-20 opacity-0 left-1/2 -translate-x-1/2 top-1/2 text-white font-medium -translate-y-1/2 text-center absolute"
+      >
+        <div class="bg-orange-500 py-4 px-8 rounded-full text-4xl">
+          try again
+        </div>
+      </div>
+      <div
         class="flex items-center justify-center headlineContainer text-white"
       >
         <div ref="secondText" class="opacity-0 z-10 text-center absolute">
@@ -12,6 +20,7 @@
             We gave you a relatable scenario <br />to visualise it for you:
           </p>
         </div>
+
         <div ref="firstText" class="opacity-0 z-10 absolute">
           <h1 class="text-7xl text-center max-w-[40rem] mb-2">Awesome!</h1>
           <h1 class="text-3xl font-light text-center max-w-[40rem] mb-6">
@@ -46,7 +55,8 @@
       </div>
       <div ref="consequences" class="opacity-0 z-20">
         <Consequences
-          class="absolute left-1/2 -translate-x-1/2 z-20 top-[200px] -translate-y-1/2"
+          ref="conseqComp"
+          class="absolute left-1/2 -translate-x-1/2 z-20 top-[130px]"
           :consList="consList"
         />
       </div>
@@ -55,7 +65,7 @@
         v-if="currSlide >= 3"
         class="flex top-1/2 -translate-y-1/2 flex-col items-center w-full absolute justify-center"
       >
-        <SugarCubes />
+        <SugarCubes :amount="Math.round(sugarCounter / 3 / 3)" />
       </div>
     </div>
     <div
@@ -73,6 +83,7 @@
     class="bottomShadow fixed left-0 w-full bottom-0 z-50 h-80 bg-gradient-to-t from-black"
   >
     <div
+      v-if="currSlide != 4"
       @click="next()"
       class="absolute cursor-pointer select-none bottom-14 inline-block left-1/2 flex flex-col items-center justify-center -translate-x-1/2 text-white"
     >
@@ -96,9 +107,11 @@ import gsap from "gsap";
 import { useSugarEffects } from "~/stores/effects";
 const receipt = ref();
 const receiptComp = ref();
+const conseqComp = ref();
 const dailyLimit = ref();
 const secondText = ref();
 const firstText = ref();
+const thirdText = ref();
 const consequences = ref();
 const effectsStore = useSugarEffects();
 const effectList = effectsStore.effects;
@@ -126,12 +139,14 @@ function setCurrSlide(index: number) {
       ease: "power3.out", // Schnellerer Verlauf am Ende
     });
   }
-  if (currSlide.value == 1) {
+  if (currSlide.value >= 1) {
     gsap.to(firstText.value, {
       opacity: 0,
       duration: 0.75, // Kürzerer Zeitraum für den Rest
       ease: "power3.out", // Schnellerer Verlauf am Ende
     });
+  }
+  if (currSlide.value == 1) {
     gsap.to(secondText.value, {
       opacity: 1,
       delay: 0.75,
@@ -157,6 +172,14 @@ function setCurrSlide(index: number) {
     scrollToReceipt();
     //showConsequences.value = true;
   }
+  if (currSlide.value < 4) {
+    gsap.to(thirdText.value, {
+      opacity: 0,
+      delay: 0.75,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+  }
   if (currSlide.value < 3) {
     gsap.to(receipt.value, {
       y: 0,
@@ -173,6 +196,17 @@ function setCurrSlide(index: number) {
   if (currSlide.value == 3 && prevSlide.value < currSlide.value) {
     scrollToCanvas();
     //showConsequences.value = true;
+  }
+  if (currSlide.value < 3 && prevSlide.value > currSlide.value) {
+    gsap.to(consequences.value, {
+      opacity: 0,
+      delay: 0,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+      onComplete: () => {
+        conseqComp.value.fadeBack(5);
+      },
+    });
   }
   prevSlide.value = currSlide.value;
 }
@@ -196,6 +230,7 @@ onMounted(() => {
 
 function next() {
   currSlide.value++;
+  prevSlide.value = currSlide.value;
   if (currSlide.value == 1) {
     gsap.to(firstText.value, {
       opacity: 0,
@@ -216,6 +251,23 @@ function next() {
   if (currSlide.value == 3) {
     scrollToCanvas();
     //showConsequences.value = true;
+  }
+  if (currSlide.value == 4) {
+    gsap.to(thirdText.value, {
+      opacity: 1,
+      delay: 0.75,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+    });
+    gsap.to(consequences.value, {
+      opacity: 0,
+      delay: 0,
+      duration: 0.75, // Kürzerer Zeitraum für den Rest
+      ease: "power3.out", // Schnellerer Verlauf am Ende
+      onComplete: () => {
+        conseqComp.value.startFadeIn(5);
+      },
+    });
   }
 }
 
@@ -243,9 +295,34 @@ function scrollToCanvas() {
   });
   gsap.to(consequences.value, {
     opacity: 1,
-    delay: 5,
+    delay: 6,
     duration: 0.75, // Kürzerer Zeitraum für den Rest
     ease: "power3.out", // Schnellerer Verlauf am Ende
+    onComplete: () => {
+      conseqComp.value.startFadeIn(5);
+    },
+  });
+}
+
+function scrollToAgain() {
+  gsap.to(receipt.value, {
+    y: -1000,
+    duration: 2, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+  });
+  gsap.to(dailyLimit.value, {
+    y: -1000,
+    duration: 2, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+  });
+  gsap.to(consequences.value, {
+    opacity: 1,
+    delay: 6,
+    duration: 0.75, // Kürzerer Zeitraum für den Rest
+    ease: "power3.out", // Schnellerer Verlauf am Ende
+    onComplete: () => {
+      conseqComp.value.startFadeIn(5);
+    },
   });
 }
 
@@ -303,7 +380,11 @@ function findSugarRange() {
 
   for (let i = 0; i < effectList.length; i++) {
     current = effectList[i];
-    if (sugarPerPerson >= current.sugarMinAmount) {
+
+    if (
+      sugarPerPerson >= current.sugarMinAmount &&
+      sugarPerPerson <= current.sugarMaxAmount
+    ) {
       consList.value.push(current);
       found = true;
     }

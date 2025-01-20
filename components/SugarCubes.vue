@@ -12,6 +12,12 @@ import gsap from "gsap";
 // Reactive property to control cube count
 const sugarCubeCount = ref(40);
 
+interface Props {
+  amount: number;
+}
+
+const props = defineProps<Props>();
+
 // References
 const sugarSceneContainer = ref<HTMLElement | null>(null);
 
@@ -128,7 +134,7 @@ onMounted(() => {
 
   // Initial cubes
   setTimeout(() => {
-    for (let i = 0; i < sugarCubeCount.value; i++) {
+    for (let i = 0; i < props.amount; i++) {
       addCube();
     }
   }, 200);

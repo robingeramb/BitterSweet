@@ -33,12 +33,9 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
 import gsap from "gsap";
 
 const receiptList = ref<HTMLUListElement | null>(null);
-
-onMounted(() => {});
 
 function startFadeIn(totalTime: number) {
   const elements = receiptList.value?.querySelectorAll(".opacity-0");
